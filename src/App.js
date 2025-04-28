@@ -1,17 +1,11 @@
-import logo from './logo.svg';
 import './App.css';
 import nv from './vn.json';
-import nv0 from './json/gadm36_VNM_0.json';
-import nv1 from './json/gadm36_VNM_1.json';
-import nv2 from './json/gadm36_VNM_2.json';
-import nv3 from './json/gadm36_VNM_3.json';
 import gadm36_XPI_0 from './json/gadm36_XPI_0.json';
 import gadm36_XSP_0 from './json/gadm36_XSP_0.json';
 // import nv1 from './vn1.json';
 
 import React, { useState } from "react";
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Marker } from "react-simple-maps";
-import demo from './vn.json';
 
 const vietnamGeoUrl =
   "https://gist.githubusercontent.com/tandat2209/5eb797fc2bcc1c8b6d71271353a40ab4/raw/ca883f00b7843afeb7b6ad73ec4370ab514a8a90/gadm36_VNM_0.json";
@@ -33,7 +27,6 @@ const geoUrl = gadm36_XSP_0;
 
 const VietnamMap = () => {
   const [hoveredProvince, setHoveredProvince] = useState(null);
-  const [data, setData] = useState(null);
 
   const handleMouseEnter = (geo) => {
     setHoveredProvince(geo.properties);
@@ -44,17 +37,15 @@ const VietnamMap = () => {
     setHoveredProvince(null);
   };
 
-  
-// ID hoặc tên 6 vùng bạn muốn đổi màu
-const highlightedRegions = [
-  {id: "VNHN", icon: "./public/marker.png"},
-  {id: "VNSG", icon: "/marker.png"},
-  {id: "VN33", icon: "/marker.png"},
-  {id: "VN26", icon: "/marker.png"},
-  {id: "VN23", icon: "/marker.png"},
-  {id: "VN59", icon: "/marker.png"}
-];
-
+  // ID hoặc tên 6 vùng bạn muốn đổi màu và thêm marker
+  const highlightedRegions = [
+    { id: "VNHN", icon: "/marker.png", x: -10, y: -25 },
+    { id: "VNSG", icon: "/marker.png", x: -5, y: -15 },
+    { id: "VN33", icon: "/marker.png", x: -10, y: -30 },
+    { id: "VN26", icon: "/marker.png", x: -3, y: -20 },
+    { id: "VN23", icon: "/marker.png", x: -1, y: -12 },
+    { id: "VN59", icon: "/marker.png", x: -5, y: -10 }
+  ];
 
   return (
     <div>
@@ -73,51 +64,71 @@ const highlightedRegions = [
                 geographies.map((geo) => {
                   const isHighlighted = highlightedRegions.some(region => region.id === geo.properties.id);
                   return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    onMouseEnter={() => handleMouseEnter(geo)}
-                    onMouseLeave={handleMouseLeave}
-                    style={{
-                      default: {
-                        fill: isHighlighted ? "#FF8000FF" : "#D6D6DA",
-                        outline: "none",
-                      },
-                      hover: {
-                        fill: hoveredProvince?.name === geo.properties.name ? "#7B00FFFF" : "#D6D6DA",
-                        stroke: "#FF00A6FF",
-                        strokeWidth: 0.3,
-                        outline: "none",
-                      },
-                      pressed: {
-                        fill: "#E42",
-                        outline: "none",
-                      },
-                    }}
-                  />
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      onMouseEnter={() => handleMouseEnter(geo)}
+                      onMouseLeave={handleMouseLeave}
+                      style={{
+                        default: {
+                          fill: isHighlighted ? "#FF8000FF" : "#D6D6DA",
+                          outline: "none",
+                        },
+                        hover: {
+                          fill: hoveredProvince?.name === geo.properties.name ? "#7B00FFFF" : "#D6D6DA",
+                          stroke: "#FF00A6FF",
+                          strokeWidth: 0.3,
+                          outline: "none",
+                        },
+                        pressed: {
+                          fill: "#E42",
+                          outline: "none",
+                        },
+                      }}
+                    />
                   );
                 })
               }
             </Geographies>
           ))}
           {highlightedRegions.map((region) => {
-            const geo = vietNam.find((geoData) => geoData.id === region.id); // Tìm đối tượng geolocation tương ứng
-            if (!geo) return null;
+          // Tìm tỉnh tương ứng
+          let matchedGeo = null;
+          for (const geoFile of vietNam) {
+            if (geoFile.features) {
+              matchedGeo = geoFile.features.find((f) => f.properties.id === region.id);
+              if (matchedGeo) break;
+            }
+          }
 
-            return (
-              <Marker key={region.id} coordinates={geo.coordinates}>
-                <image
-                  href={region.icon} // Đường dẫn đến hình ảnh icon
-                  width="20"
-                  height="20"
-                  x="-10" // Dịch chuyển để căn giữa icon
-                  y="-10"
-                />
-              </Marker>
-            );
-          })}
+          if (!matchedGeo) return null; // Nếu không tìm thấy thì bỏ qua
+
+          // Lấy tọa độ
+          const coordinates = matchedGeo.geometry.coordinates;
+          let markerCoordinates = [];
+
+          // Chú ý: nếu geometry là Polygon hoặc MultiPolygon thì cần xử lý khác nhau
+          if (matchedGeo.geometry.type === "Polygon") {
+            // Lấy trung tâm đại khái bằng điểm đầu tiên
+            markerCoordinates = matchedGeo.geometry.coordinates[0][0];
+          } else if (matchedGeo.geometry.type === "MultiPolygon") {
+            // Nếu là MultiPolygon (nhiều mảng), lấy mảng đầu tiên, điểm đầu tiên
+            markerCoordinates = matchedGeo.geometry.coordinates[0][0][0];
+          }
+
+          return (
+            <Marker key={region.id} coordinates={markerCoordinates}>
+              <image
+                href={region.icon}
+                width="20"
+                height="20"
+                x={region.x}
+                y={region.y}
+              />
+            </Marker>
+          );
+        })}
         </ZoomableGroup>
-       
       </ComposableMap>
 
       {(hoveredProvince || true) && (
