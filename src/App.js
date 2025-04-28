@@ -10,7 +10,7 @@ import gadm36_XSP_0 from './json/gadm36_XSP_0.json';
 // import nv1 from './vn1.json';
 
 import React, { useState } from "react";
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
+import { ComposableMap, Geographies, Geography, ZoomableGroup, Marker } from "react-simple-maps";
 import demo from './vn.json';
 
 const vietnamGeoUrl =
@@ -33,6 +33,7 @@ const geoUrl = gadm36_XSP_0;
 
 const VietnamMap = () => {
   const [hoveredProvince, setHoveredProvince] = useState(null);
+  const [data, setData] = useState(null);
 
   const handleMouseEnter = (geo) => {
     setHoveredProvince(geo.properties);
@@ -42,6 +43,18 @@ const VietnamMap = () => {
   const handleMouseLeave = () => {
     setHoveredProvince(null);
   };
+
+  
+// ID hoặc tên 6 vùng bạn muốn đổi màu
+const highlightedRegions = [
+  {id: "VNHN", icon: "./public/marker.png"},
+  {id: "VNSG", icon: "/marker.png"},
+  {id: "VN33", icon: "/marker.png"},
+  {id: "VN26", icon: "/marker.png"},
+  {id: "VN23", icon: "/marker.png"},
+  {id: "VN59", icon: "/marker.png"}
+];
+
 
   return (
     <div>
@@ -57,7 +70,9 @@ const VietnamMap = () => {
           {vietNam.map((geoUrl, index) => (
             <Geographies key={index} geography={geoUrl}>
               {({ geographies }) =>
-                geographies.map((geo) => (
+                geographies.map((geo) => {
+                  const isHighlighted = highlightedRegions.some(region => region.id === geo.properties.id);
+                  return (
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
@@ -65,11 +80,13 @@ const VietnamMap = () => {
                     onMouseLeave={handleMouseLeave}
                     style={{
                       default: {
-                        fill: hoveredProvince?.name === geo.properties.name ? "#F53" : "#DDD",
+                        fill: isHighlighted ? "#FF8000FF" : "#D6D6DA",
                         outline: "none",
                       },
                       hover: {
-                        fill: "#F53",
+                        fill: hoveredProvince?.name === geo.properties.name ? "#7B00FFFF" : "#D6D6DA",
+                        stroke: "#FF00A6FF",
+                        strokeWidth: 0.3,
                         outline: "none",
                       },
                       pressed: {
@@ -78,10 +95,27 @@ const VietnamMap = () => {
                       },
                     }}
                   />
-                ))
+                  );
+                })
               }
             </Geographies>
           ))}
+          {highlightedRegions.map((region) => {
+            const geo = vietNam.find((geoData) => geoData.id === region.id); // Tìm đối tượng geolocation tương ứng
+            if (!geo) return null;
+
+            return (
+              <Marker key={region.id} coordinates={geo.coordinates}>
+                <image
+                  href={region.icon} // Đường dẫn đến hình ảnh icon
+                  width="20"
+                  height="20"
+                  x="-10" // Dịch chuyển để căn giữa icon
+                  y="-10"
+                />
+              </Marker>
+            );
+          })}
         </ZoomableGroup>
        
       </ComposableMap>
@@ -93,7 +127,7 @@ const VietnamMap = () => {
               <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
             </svg>
           </div>
-          <h3>Thông tin tỉnh: {hoveredProvince?.name || "Hehehe"}</h3>
+          <h3>Thông tin tỉnh: {hoveredProvince?.name || "Bạn hãy chọn tỉnh?"}</h3>
         </div>
       )}
     </div>
