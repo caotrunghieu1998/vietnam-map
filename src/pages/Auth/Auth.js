@@ -9,9 +9,10 @@ import "../../assets/vendor/css/theme-default.css";
 import "../../assets/css/demo.css";
 import "../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css";
 import "../../assets/vendor/css/pages/page-auth.css";
+import { USER_VERVICE } from "../../api/userService";
 
 const Login = ({ title }) => {
-  const [email, setEmail] = useState(""); // Input field cho email
+  const [userName, setUserName] = useState(""); // Input field cho email
   const [password, setPassword] = useState("");
   const [validationError, setValidationError] = useState(""); // Lỗi validate
   const navigate = useNavigate();
@@ -21,31 +22,43 @@ const Login = ({ title }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Kiểm tra xem email và password có trống hay không
-    if (!email || !password) {
+    if (!userName || !password) {
       setValidationError("Email và mật khẩu là bắt buộc");
       return;
     }
 
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/login`,
-        {
-          email, // Gửi email dưới dạng username
-          password,
-        }
-      );
+    const dataLogin = await USER_VERVICE.userLogin({ username: userName, password: password });
 
-      // Lưu access token vào localStorage
-      localStorage.setItem("access_token", response.data.access_token);
-      localStorage.setItem("refresh_token", response.data.refresh_token);
-      localStorage.setItem("token_type", response.data.token_type);
-      setValidationError(""); // Xóa lỗi validate
-      navigate("/"); // Điều hướng tới trang dashboard sau khi đăng nhập thành công
-    } catch (error) {
-      setValidationError("Thông tin đăng nhập không hợp lệ");
+    if (dataLogin.isSuccess) {
+      alert(`Xin chào "${dataLogin.data.USERNAME}"`);
+      localStorage.setItem("username", dataLogin.data.USERNAME);
+      navigate("/nhap-du-lieu-tinh");
+    } else {
+      setValidationError(dataLogin.errorMessage);
     }
+    // try {
+    //   const response = await axios.post(
+    //     `${process.env.REACT_APP_API_URL}/auth/login`,
+    //     {
+    //       userName, // Gửi userName dưới dạng username
+    //       password,
+    //     }
+    //   );
+
+    //   // Lưu access token vào localStorage
+    //   localStorage.setItem("access_token", response.data.access_token);
+    //   localStorage.setItem("refresh_token", response.data.refresh_token);
+    //   localStorage.setItem("token_type", response.data.token_type);
+    //   setValidationError(""); // Xóa lỗi validate
+    //   navigate("/"); // Điều hướng tới trang dashboard sau khi đăng nhập thành công
+    // } catch (error) {
+    //   setValidationError("Đã có lỗi xảy ra");
+    // }
   };
+
+  useEffect(() => { 
+    document.title = title;
+  }, []);
 
   return (
     <div>
@@ -55,7 +68,7 @@ const Login = ({ title }) => {
             <div className="card px-sm-6 px-0">
               <div className="card-body">
                 <h4 className="mb-1">Xin Chào 👋</h4>
-                <p className="mb-6">Vui lòng đăng nhập để vào trung tâm</p>
+                <p className="mb-6">Vui lòng đăng nhập vào tài khoản admin</p>
 
                 <form
                   id="formAuthentication"
@@ -63,16 +76,13 @@ const Login = ({ title }) => {
                   onSubmit={handleSubmit}
                 >
                   <div className="mb-6">
-                    <label htmlFor="email" className="form-label">
-                      Email or Username
-                    </label>
+                    <label htmlFor="userName" className="form-label">Username</label>
                     <input
-                      type="email"
+                      type="text"
                       className="form-control"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Nhập email"
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                      placeholder="Nhập userName"
                       required
                       autoFocus
                     />
@@ -118,7 +128,7 @@ const Login = ({ title }) => {
                     <button
                       className="btn btn-primary d-grid w-100"
                       type="submit"
-                      onClick={() => navigate("/", { replace: true })}
+                      // onClick={() => navigate("/", { replace: true })}
                     >
                       Đăng nhập
                     </button>
@@ -126,173 +136,16 @@ const Login = ({ title }) => {
                 </form>
 
                 {/* Hiển thị lỗi validate nếu có */}
-                {validationError && (
+                {!!validationError && (
                   <p style={{ color: "red" }}>{validationError}</p>
                 )}
 
-                <p className="text-center">
-                  <span>Chưa có tài khoản đăng nhập?</span>
-                  <NavigateButton
-                    to="/register"
-                    className="btn btn-sm btn-outline-primary"
-                  >
-                    Đăng ký
-                  </NavigateButton>
-                </p>
                 <NavigateButton
                   to="/forgot-password"
                   className="btn btn-sm btn-outline-primary"
                 >
                   Quên mật khẩu?
                 </NavigateButton>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Register = ({ title }) => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user"); // Đặt role mặc định là "user"
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    document.title = title;
-  }, [title]);
-
-  const handleRegister = async (e) => {
-    e.preventDefault(); // Ngăn không reload trang khi submit form
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/user`,
-        {
-          username,
-          email,
-          password,
-          role,
-        }
-      );
-
-      if (response.status === 201) {
-        alert("Đăng ký thành công!");
-        navigate("/"); // Điều hướng tới trang đăng nhập
-      } else {
-        // Nếu status không phải là 201, ném lỗi
-        throw new Error("Đã xảy ra lỗi, vui lòng thử lại!");
-      }
-    } catch (error) {
-      // Nhận lỗi trả về từ API trong error.response
-      if (error.response) {
-        // Lỗi từ phía server (4xx, 5xx)
-        setError(error.response.data.error);
-      }
-    }
-  };
-
-  return (
-    <div>
-      <div className="container-xxl">
-        <div className="authentication-wrapper authentication-basic container-p-y">
-          <div className="authentication-inner">
-            <div className="card px-sm-6 px-0">
-              <div className="card-body">
-                <h4 className="mb-1">Đăng ký ở đây nha 🚀</h4>
-                <p className="mb-6">Bây giờ là {new Date().toLocaleString()}</p>
-
-                {error && <p style={{ color: "red" }}>{error}</p>}
-
-                <form onSubmit={handleRegister} className="mb-6">
-                  <div className="mb-6">
-                    <label htmlFor="username" className="form-label">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Enter your username"
-                      autoFocus
-                      required
-                    />
-                  </div>
-                  <div className="mb-6">
-                    <label htmlFor="email" className="form-label">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                  <div className="mb-6 form-password-toggle">
-                    <label className="form-label" htmlFor="password">
-                      Password
-                    </label>
-                    <div className="input-group input-group-merge">
-                      <input
-                        type="password"
-                        id="password"
-                        className="form-control"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                        required
-                      />
-                      <span className="input-group-text cursor-pointer">
-                        <i className="bx bx-hide"></i>
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mb-6">
-                    <label htmlFor="role" className="form-label">
-                      Role
-                    </label>
-                    <select
-                      className="form-control"
-                      id="role"
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
-                    >
-                      <option value="Admin" selected>
-                        Admin
-                      </option>
-                      <option value="Manager">Manager</option>
-                      <option value="Employee">Employee</option>
-                    </select>
-                  </div>
-                  <button
-                    type="submit"
-                    className="btn btn-primary d-grid w-100"
-                  >
-                    Đăng ký
-                  </button>
-                </form>
-
-                <p className="text-center">
-                  <span>Đã có tài khoản?</span>
-                  <a
-                    href="/login"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate("/login");
-                    }}
-                  >
-                    <span> Đăng nhập</span>
-                  </a>
-                </p>
               </div>
             </div>
           </div>
@@ -393,4 +246,4 @@ const Forgot = ({ title }) => {
     </div>
   );
 };
-export { Login, Register, Forgot };
+export { Login, Forgot };

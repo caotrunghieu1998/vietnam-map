@@ -2,61 +2,22 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavigateButton from "../../components/Navigate";
+import { DEPARTMENRS_VERVICE } from "../../api/departments";
+import Loading from "../../utils/loading";
 
-const Department = ({ title }) => {
+const Department = ({ title, dataUser }) => {
   document.title = title;
   const [departmentName, setDepartmentName] = useState("");
   const [location, setLocation] = useState("");
   const [year, setYear] = useState("");
-  const [departments, setDepartments] = useState([
-    {
-      id: 1,
-      department_name: "Hà Nội",
-      year: 2024,
-      location: 8500000,
-      population: 8500000,
-      area: 3358.6,
-      gdp: 46.5
-    },
-    {
-      id: 2,
-      department_name: "TP. Hồ Chí Minh",
-      year: 2024,
-      location: 9500000,
-      population: 9500000,
-      area: 2095.6,
-      gdp: 52.3
-    },
-    {
-      id: 3,
-      department_name: "Đà Nẵng",
-      year: 2024,
-      location: 1200000,
-      population: 1200000,
-      area: 1285.4,
-      gdp: 38.7
-    },
-    {
-      id: 4,
-      department_name: "Cần Thơ",
-      year: 2024,
-      location: 1500000,
-      population: 1500000,
-      area: 1439.2,
-      gdp: 35.2
-    },
-    {
-      id: 5,
-      department_name: "Hải Phòng",
-      year: 2024,
-      location: 2100000,
-      population: 2100000,
-      area: 1522.5,
-      gdp: 42.1
-    }
-  ]);
+  const [departments, setDepartments] = useState([]);
+  const [isGettingData, setIsGettingData] = useState(false); 
   const [editingId, setEditingId] = useState(null);
   const navigate = useNavigate();
+
+  const [tenTinh, setTenTinh] = useState("");
+  const [tuoiThoTrungBinh, setTuoiThoTrungBinh] = useState("");
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,13 +46,14 @@ const Department = ({ title }) => {
     setDepartmentName("");
     setLocation("");
     setYear("");
+    setTenTinh("");
+    setTuoiThoTrungBinh("");
   };
 
   const handleEdit = (department) => {
-    setDepartmentName(department.department_name);
-    setLocation(department.location.toString());
-    setYear(department.year.toString());
-    setEditingId(department.id);
+    setTenTinh(department.province_name);
+    setTuoiThoTrungBinh(department.tuoi_tho_trung_binh);
+    setEditingId(department.province_code);
   };
 
   const handleDelete = (id) => {
@@ -99,6 +61,23 @@ const Department = ({ title }) => {
       setDepartments(departments.filter(dept => dept.id !== id));
     }
   };
+
+  useEffect(() => {
+    const getData = async () => {
+      setIsGettingData(true);
+      const data = await DEPARTMENRS_VERVICE.getAllData();
+      if (data.errorMessage) {
+        alert(data.errorMessage);
+        navigate('/');
+      } else {
+        setDepartments(data.data);
+      }
+      setIsGettingData(false);
+    }
+    getData();
+  }, [])
+
+  if (isGettingData) return <Loading />
 
   return (
     <div className="container-xxl flex-grow-1 container-p-y bg-transparent">
@@ -109,6 +88,9 @@ const Department = ({ title }) => {
               <h5 className="mb-0">Nhập dữ liệu tỉnh</h5>
               <NavigateButton to="/" className="btn btn-dark">
                 Trang Chủ
+              </NavigateButton>
+              <NavigateButton to="/logout" className="btn btn-light">
+                Logout
               </NavigateButton>
             </div>
             <div className="card-body">
@@ -122,37 +104,23 @@ const Department = ({ title }) => {
                       type="text"
                       id="department-name"
                       className="form-control"
-                      value={departmentName}
-                      onChange={(e) => setDepartmentName(e.target.value)}
+                      value={tenTinh}
+                      onChange={(e) => setTenTinh(e.target.value)}
                       placeholder="Nhập tên tỉnh"
                       required
                     />
                   </div>
                   <div className="col-md-4 mb-3">
                     <label className="form-label" htmlFor="year">
-                      Năm
+                      Tuổi thọ trung bình
                     </label>
                     <input
                       type="number"
                       id="year"
                       className="form-control"
-                      value={year}
-                      onChange={(e) => setYear(e.target.value)}
+                      value={tuoiThoTrungBinh}
+                      onChange={(e) => setTuoiThoTrungBinh(e.target.value)}
                       placeholder="Nhập năm"
-                      required
-                    />
-                  </div>
-                  <div className="col-md-4 mb-3">
-                    <label className="form-label" htmlFor="target">
-                      Dân số
-                    </label>
-                    <input
-                      type="number"
-                      id="target"
-                      className="form-control"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="Nhập dân số"
                       required
                     />
                   </div>
@@ -193,21 +161,17 @@ const Department = ({ title }) => {
                       <th>STT</th>
                       <th>Tên tỉnh</th>
                       <th>Năm</th>
-                      <th>Dân số</th>
-                      <th>Diện tích (km²)</th>
-                      <th>GRDP (triệu đồng)</th>
+                      <th>Tuổi thọ trung bình</th>
                       <th>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     {departments.map((department, index) => (
-                      <tr key={department.id}>
+                      <tr key={department.province_code}>
                         <td>{index + 1}</td>
-                        <td>{department.department_name}</td>
-                        <td>{department.year}</td>
-                        <td>{department.population.toLocaleString()}</td>
-                        <td>{department.area.toFixed(1)}</td>
-                        <td>{department.gdp.toFixed(1)}</td>
+                        <td>{department.province_name}</td>
+                        <td>{department.nam}</td>
+                        <td>{department.tuoi_tho_trung_binh}</td>
                         <td>
                           <button
                             className="btn btn-sm btn-primary me-2"
