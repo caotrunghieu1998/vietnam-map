@@ -11,7 +11,7 @@ const News = ({ title }) => {
       date: "15/03/2024",
       category: "Chính sách",
       content: "Chính phủ vừa ban hành Nghị quyết mới về quy hoạch sử dụng đất quốc gia đến năm 2030, tầm nhìn đến năm 2050. Theo đó, sẽ có những điều chỉnh quan trọng về phân bổ đất đai cho các mục đích phát triển kinh tế - xã hội.",
-      image: "https://via.placeholder.com/300x200",
+      image: "https://cdn.thuvienphapluat.vn/uploads/tintuc/2024/10/23/dieu-chinh-quy-hoach-su-dung-dat-quoc-gia.jpg",
       source: "Bộ Tài nguyên và Môi trường"
     },
     {
@@ -20,7 +20,7 @@ const News = ({ title }) => {
       date: "10/03/2024",
       category: "Quy hoạch",
       content: "UBND TP Hà Nội vừa công bố quy hoạch mở rộng đô thị với diện tích 1.000 ha tại huyện Đông Anh. Dự án này sẽ tạo thêm không gian phát triển cho thủ đô trong tương lai.",
-      image: "https://via.placeholder.com/300x200",
+      image: "https://ubnd-hanoi.mediacdn.vn/90649499933302784/2025/1/14/b24eff0912feaea0f7ef-1736838403609-17368384050701786027768.jpg",
       source: "UBND TP Hà Nội"
     },
     {
@@ -29,7 +29,7 @@ const News = ({ title }) => {
       date: "05/03/2024",
       category: "Hành chính",
       content: "Bộ Nội vụ đang xem xét đề xuất sáp nhập một số tỉnh, thành phố có quy mô dân số nhỏ để tăng hiệu quả quản lý và phát triển kinh tế - xã hội.",
-      image: "https://via.placeholder.com/300x200",
+      image: "https://cloudcdnvod.tek4tv.vn/Mam/attach/upload/09032025234718/234721_713653cfe8f159af00e0.jpg",
       source: "Bộ Nội vụ"
     },
     {
@@ -38,7 +38,7 @@ const News = ({ title }) => {
       date: "01/03/2024",
       category: "Doanh nghiệp",
       content: "Chính phủ ban hành Nghị định mới về chính sách đất đai cho doanh nghiệp, tạo điều kiện thuận lợi hơn cho hoạt động đầu tư và phát triển sản xuất.",
-      image: "https://via.placeholder.com/300x200",
+      image: "https://cdn.thuvienphapluat.vn/uploads/cong-dong-dan-luat/2023/04/24/chinh-sach-moi-noi-bat-ve-dat-dai-va-thue-co-hieu-luc-tu-thang-5-2023%20.png",
       source: "Bộ Tài chính"
     }
   ]);

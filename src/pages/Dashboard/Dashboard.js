@@ -46,6 +46,19 @@ const Dashboard = ({ title }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedFromSearch, setSelectedFromSearch] = useState(null);
+  const [viewMode, setViewMode] = useState('statistics'); // 'statistics' or 'prediction'
+  const [predictionData, setPredictionData] = useState({
+    labels: ['2024', '2025', '2026', '2027', '2028'],
+    datasets: [
+      {
+        label: 'Dự đoán dân số',
+        data: [98000000, 98500000, 99000000, 99500000, 100000000],
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        fill: true,
+      }
+    ]
+  });
 
   const handleMouseEnter = (geo) => {
     setHoveredProvince(geo.properties);
@@ -164,82 +177,156 @@ const Dashboard = ({ title }) => {
       {/* Navbar cố định trên cùng */}
       <div className="navbar fixed-top bg-secondary px-4 py-2 shadow-sm z-10 d-flex justify-content-between align-items-center">
         {/* Thanh search và filter */}
-        <div className="d-flex align-items-center position-relative">
-          <input 
-            type="search" 
-            className="form-control form-control-sm me-2" 
-            placeholder="Tìm kiếm tỉnh thành..." 
-            value={searchKeyword}
-            onChange={handleSearch}
-            style={{ 
-              width: '250px',
-              borderRadius: '20px',
-              paddingLeft: '15px',
-              border: '1px solid #e0e0e0'
-            }}
-          />
-          
-          {searchResults.length > 0 && searchKeyword && (
-            <div className="position-absolute top-100 start-0 mt-1 w-100 bg-white shadow-sm rounded-3 border" 
-                 style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}>
-              {searchResults.map((result, index) => (
-                <div 
-                  key={index}
-                  className="px-3 py-2 cursor-pointer"
-                  onClick={() => {
-                    handleProvinceClick(result, null);
-                    setSearchKeyword('');
-                    setSearchResults([]);
-                  }}
-                  style={{ 
-                    cursor: 'pointer',
-                    color: '#000',
-                    transition: 'all 0.2s',
-                    backgroundColor: 'white'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f8f9fa'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white'
-                  }}
-                >
-                  {result.properties.name}
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="d-flex align-items-center position-relative" style={{ gap: '10px' }}>
+          <div className="position-relative" style={{ flex: 1, maxWidth: '280px' }}>
+            <input 
+              type="search" 
+              className="form-control form-control-sm" 
+              placeholder="Tìm kiếm tỉnh thành..." 
+              value={searchKeyword}
+              onChange={handleSearch}
+              style={{ 
+                width: '100%',
+                borderRadius: '25px',
+                paddingLeft: '20px',
+                paddingRight: '40px',
+                border: '1px solid #e0e0e0',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                transition: 'all 0.3s ease',
+                background: 'rgba(255, 255, 255, 0.9)',
+                fontSize: '0.9rem',
+                height: '38px'
+              }}
+              onFocus={(e) => {
+                e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                e.target.style.border = '1px solid #80bdff';
+                e.target.style.background = '#ffffff';
+              }}
+              onBlur={(e) => {
+                e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                e.target.style.border = '1px solid #e0e0e0';
+                e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+              }}
+            />
+            
+            <button 
+              className="btn btn-sm btn-light position-absolute" 
+              style={{ 
+                right: '5px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                borderRadius: '20px',
+                padding: '0.375rem 1rem',
+                border: 'none',
+                background: 'transparent',
+                color: '#666',
+                transition: 'all 0.3s ease',
+                zIndex: 2
+              }}
+              onClick={() => {
+                if (searchResults.length > 0) {
+                  handleProvinceClick(searchResults[0], null);
+                  setSearchKeyword('');
+                  setSearchResults([]);
+                }
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#007bff';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#666';
+              }}
+            >
+              <i className="fas fa-search"></i>
+            </button>
 
-          <button 
-            className="btn btn-sm btn-light me-2" 
-            style={{ borderRadius: '20px' }}
-            onClick={() => {
-              if (searchResults.length > 0) {
-                handleProvinceClick(searchResults[0], null);
-                setSearchKeyword('');
-                setSearchResults([]);
-              }
-            }}
-          >
-            <i className="fas fa-search"></i> Tìm
-          </button>
+            {searchResults.length > 0 && searchKeyword && (
+              <div className="position-absolute top-100 start-0 mt-1 w-100 bg-white shadow-lg rounded-3 border" 
+                   style={{ 
+                     maxHeight: '200px', 
+                     overflowY: 'auto', 
+                     zIndex: 1000,
+                     border: '1px solid rgba(0,0,0,0.1)',
+                     backdropFilter: 'blur(10px)',
+                     backgroundColor: 'rgba(255, 255, 255, 0.95)'
+                   }}>
+                {searchResults.map((result, index) => (
+                  <div 
+                    key={index}
+                    className="px-3 py-2 cursor-pointer"
+                    onClick={() => {
+                      handleProvinceClick(result, null);
+                      setSearchKeyword('');
+                      setSearchResults([]);
+                    }}
+                    style={{ 
+                      cursor: 'pointer',
+                      color: '#000',
+                      transition: 'all 0.2s',
+                      backgroundColor: 'transparent',
+                      borderBottom: index !== searchResults.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(0,123,255,0.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <i className="fas fa-map-marker-alt me-2 text-primary"></i>
+                    {result.properties.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-          {/* Thêm filter năm */}
-          <select 
-            className="form-select form-select-sm" 
-            style={{ 
-              width: '120px',
-              borderRadius: '20px',
-              border: '1px solid #e0e0e0'
-            }}
-          >
-            <option value="">Chọn năm</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-          </select>
+          {/* Filter năm */}
+          <div className="position-relative">
+            <select 
+              className="form-select form-select-sm" 
+              style={{ 
+                width: '120px',
+                borderRadius: '20px',
+                border: '1px solid #e0e0e0',
+                paddingLeft: '15px',
+                paddingRight: '30px',
+                height: '38px',
+                fontSize: '0.9rem',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                transition: 'all 0.3s ease',
+                background: 'rgba(255, 255, 255, 0.9)',
+                appearance: 'none',
+                cursor: 'pointer'
+              }}
+              onFocus={(e) => {
+                e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                e.target.style.border = '1px solid #80bdff';
+                e.target.style.background = '#ffffff';
+              }}
+              onBlur={(e) => {
+                e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                e.target.style.border = '1px solid #e0e0e0';
+                e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+              }}
+            >
+              <option value="">Chọn năm</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+              <option value="2019">2019</option>
+            </select>
+            <i className="fas fa-chevron-down position-absolute" 
+               style={{ 
+                 right: '12px', 
+                 top: '50%', 
+                 transform: 'translateY(-50%)',
+                 fontSize: '0.8rem',
+                 color: '#666',
+                 pointerEvents: 'none'
+               }}></i>
+          </div>
         </div>
 
         {/* Nút đăng nhập/đăng xuất và tên người dùng */}
@@ -295,14 +382,6 @@ const Dashboard = ({ title }) => {
         >
           <i className="fas fa-file-alt me-2"></i>
           Tin Tức
-        </NavigateButton>
-        <NavigateButton
-          to="/tin-tuc"
-          className="btn btn-light shadow-sm"
-          style={{ width: '150px', borderRadius: '10px' }}
-        >
-          <i className="fas fa-chart-line me-2"></i>
-          Phân tích
         </NavigateButton>
         <NavigateButton
           to="/cai-dat"
@@ -481,95 +560,220 @@ const Dashboard = ({ title }) => {
 
           {/* Cột biểu đồ - chiếm 4 cột */}
           <div className="col-lg-4" style={{ marginTop: "85px" }}>
-            <div className="card mb-4" style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-              <div className="card-header" style={{ backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
-                <h5 className="card-title mb-0">Thống kê dân số</h5>
-              </div>
+            {/* Switch Button */}
+            <div className="card mb-4">
               <div className="card-body">
-                <div className="mb-4">
-                  <Line 
-                    data={populationData} 
-                    options={{
-                      ...options,
-                      plugins: {
-                        ...options.plugins,
-                        legend: {
-                          ...options.plugins.legend,
-                          labels: {
-                            color: '#666'
-                          }
-                        }
-                      },
-                      scales: {
-                        y: {
-                          grid: {
-                            color: '#e0e0e0'
-                          },
-                          ticks: {
-                            color: '#666'
-                          }
-                        },
-                        x: {
-                          grid: {
-                            color: '#e0e0e0'
-                          },
-                          ticks: {
-                            color: '#666'
-                          }
-                        }
-                      }
-                    }} 
-                  />
+                <div className="d-flex justify-content-center">
+                  <div className="btn-group" role="group">
+                    <button
+                      type="button"
+                      className={`btn ${viewMode === 'statistics' ? 'btn-primary' : 'btn-outline-primary'}`}
+                      onClick={() => setViewMode('statistics')}
+                    >
+                      <i className="fas fa-chart-bar me-2"></i>
+                      Thống kê
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn ${viewMode === 'prediction' ? 'btn-primary' : 'btn-outline-primary'}`}
+                      onClick={() => setViewMode('prediction')}
+                    >
+                      <i className="fas fa-chart-line me-2"></i>
+                      Dự đoán
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="card" style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-              <div className="card-header" style={{ backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
-                <h5 className="card-title mb-0">Chỉ số già hóa</h5>
-              </div>
-              <div className="card-body">
-                <div>
-                  <Bar 
-                    data={agingData} 
-                    options={{
-                      ...options,
-                      plugins: {
-                        ...options.plugins,
-                        title: {
-                          ...options.plugins.title,
-                          text: 'Chỉ số già hóa qua các năm'
+            {viewMode === 'statistics' ? (
+              <>
+                <div className="card mb-4" style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
+                  <div className="card-header" style={{ backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
+                    <h5 className="card-title mb-0">Thống kê dân số</h5>
+                  </div>
+                  <div className="card-body">
+                    <div style={{ height: '250px' }}>
+                      <Line 
+                        data={populationData} 
+                        options={{
+                          ...options,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            ...options.plugins,
+                            legend: {
+                              ...options.plugins.legend,
+                              labels: {
+                                color: '#666',
+                                boxWidth: 12,
+                                font: {
+                                  size: 11
+                                }
+                              }
+                            }
+                          },
+                          scales: {
+                            y: {
+                              grid: {
+                                color: '#e0e0e0'
+                              },
+                              ticks: {
+                                color: '#666',
+                                font: {
+                                  size: 10
+                                }
+                              }
+                            },
+                            x: {
+                              grid: {
+                                color: '#e0e0e0'
+                              },
+                              ticks: {
+                                color: '#666',
+                                font: {
+                                  size: 10
+                                }
+                              }
+                            }
+                          }
+                        }} 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card" style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
+                  <div className="card-header" style={{ backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
+                    <h5 className="card-title mb-0">Chỉ số già hóa</h5>
+                  </div>
+                  <div className="card-body">
+                    <div style={{ height: '250px' }}>
+                      <Bar 
+                        data={agingData} 
+                        options={{
+                          ...options,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            ...options.plugins,
+                            title: {
+                              ...options.plugins.title,
+                              text: 'Chỉ số già hóa qua các năm',
+                              font: {
+                                size: 12
+                              }
+                            },
+                            legend: {
+                              ...options.plugins.legend,
+                              labels: {
+                                color: '#666',
+                                boxWidth: 12,
+                                font: {
+                                  size: 11
+                                }
+                              }
+                            }
+                          },
+                          scales: {
+                            y: {
+                              grid: {
+                                color: '#e0e0e0'
+                              },
+                              ticks: {
+                                color: '#666',
+                                font: {
+                                  size: 10
+                                }
+                              }
+                            },
+                            x: {
+                              grid: {
+                                color: '#e0e0e0'
+                              },
+                              ticks: {
+                                color: '#666',
+                                font: {
+                                  size: 10
+                                }
+                              }
+                            }
+                          }
+                        }} 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="card" style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
+                <div className="card-header" style={{ backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
+                  <h5 className="card-title mb-0">Dự đoán dân số Việt Nam</h5>
+                </div>
+                <div className="card-body">
+                  <div style={{ height: '250px' }}>
+                    <Line 
+                      data={predictionData} 
+                      options={{
+                        ...options,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          ...options.plugins,
+                          title: {
+                            ...options.plugins.title,
+                            text: 'Dự đoán dân số đến năm 2028',
+                            font: {
+                              size: 12
+                            }
+                          },
+                          legend: {
+                            ...options.plugins.legend,
+                            labels: {
+                              color: '#666',
+                              boxWidth: 12,
+                              font: {
+                                size: 11
+                              }
+                            }
+                          }
                         },
-                        legend: {
-                          ...options.plugins.legend,
-                          labels: {
-                            color: '#666'
+                        scales: {
+                          y: {
+                            grid: {
+                              color: '#e0e0e0'
+                            },
+                            ticks: {
+                              color: '#666',
+                              font: {
+                                size: 10
+                              },
+                              callback: function(value) {
+                                return (value / 1000000).toFixed(1) + 'M';
+                              }
+                            }
+                          },
+                          x: {
+                            grid: {
+                              color: '#e0e0e0'
+                            },
+                            ticks: {
+                              color: '#666',
+                              font: {
+                                size: 10
+                              }
+                            }
                           }
                         }
-                      },
-                      scales: {
-                        y: {
-                          grid: {
-                            color: '#e0e0e0'
-                          },
-                          ticks: {
-                            color: '#666'
-                          }
-                        },
-                        x: {
-                          grid: {
-                            color: '#e0e0e0'
-                          },
-                          ticks: {
-                            color: '#666'
-                          }
-                        }
-                      }
-                    }} 
-                  />
+                      }} 
+                    />
+                  </div>
+                  <div className="alert alert-info mt-2 mb-0">
+                    <h6 className="alert-heading mb-1">Thông tin dự đoán:</h6>
+                    <p className="mb-0 small">
+                      Dựa trên xu hướng tăng trưởng dân số hiện tại, dân số Việt Nam được dự đoán sẽ đạt 100 triệu người vào năm 2028.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import Department from "../pages/Departments/Departments";
 import Introduce from "../pages/Introduce/Introduce";
 import CompareProvinces from "../pages/CompareProvinces/CompareProvinces";
 import News from "../pages/News/News";
-// import CreateEmployee from "../pages/Employees/AddEmployee";
+import Setting from "../pages/Setting/Setting";
 // import EmployeeList from "../pages/Employees/EmployeeList";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Logout from "../pages/Auth/Logout";
@@ -71,6 +71,12 @@ const AppRoutes = () => (
       <Route
         path="/tin-tuc"
         element={<News title="Tin tức địa lý" />}
+      />
+    </Routes>
+    <Routes>
+      <Route
+        path="/cai-dat"
+        element={<Setting title="Cài đặt hệ thống" />}
       />
     </Routes>
   </BrowserRouter>
