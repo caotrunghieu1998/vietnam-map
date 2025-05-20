@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Login, Register, Forgot } from "../pages/Auth/Auth";
 // import { UserMe, GetAllUser } from "../pages/User/User";
-// import PostDepartment from "../pages/Departments/Departments";
-// import GetDepartments from "../pages/Departments/GetDepartments";
-// import FetchPositions from "../pages/Positions/Positions";
-// import CreatePositionForm from "../pages/Positions/AddPositions";
+import Department from "../pages/Departments/Departments";
+import Introduce from "../pages/Introduce/Introduce";
+import CompareProvinces from "../pages/CompareProvinces/CompareProvinces";
+import News from "../pages/News/News";
 // import CreateEmployee from "../pages/Employees/AddEmployee";
 // import EmployeeList from "../pages/Employees/EmployeeList";
 import Dashboard from "../pages/Dashboard/Dashboard";
@@ -42,7 +42,36 @@ const AppRoutes = () => (
           </Protected>
         }
       />
-      
+      <Route
+        path="/nhap-du-lieu-tinh"
+        element={
+          <Protected>
+            <Department title="Nhập dữ liệu tỉnh" />
+          </Protected>
+        }
+      />
+      <Route
+        path="/introduce"
+        element={
+          <Protected>
+            <Introduce title="Giới thiệu đồ án" />
+          </Protected>
+        }
+      />
+      <Route
+        path="/so-sanh-tinh-thanh"
+        element={
+          <Protected>
+            <CompareProvinces title="So sánh tỉnh thành" />
+          </Protected>  
+        }
+      />
+    </Routes>
+    <Routes>
+      <Route
+        path="/tin-tuc"
+        element={<News title="Tin tức địa lý" />}
+      />
     </Routes>
   </BrowserRouter>
 );

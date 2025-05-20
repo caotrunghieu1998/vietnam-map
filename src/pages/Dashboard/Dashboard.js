@@ -242,17 +242,80 @@ const Dashboard = ({ title }) => {
           </select>
         </div>
 
-        {/* Nút đăng nhập */}
+        {/* Nút đăng nhập/đăng xuất và tên người dùng */}
+        <div className="d-flex align-items-center gap-2">
+          {localStorage.getItem("access_token") ? (
+            <>
+              <span className="text-white me-2">
+                <i className="fas fa-user-circle me-1"></i>
+                {localStorage.getItem("user_name") || "Người dùng"}
+              </span>
+              <NavigateButton
+                to="/logout"
+                className="btn btn-sm btn-outline-light"
+              >
+                <i className="fas fa-sign-out-alt me-1"></i>
+                Đăng Xuất
+              </NavigateButton>
+            </>
+          ) : (
+            <NavigateButton
+              to="/login"
+              className="btn btn-sm btn-outline-light"
+            >
+              <i className="fas fa-sign-in-alt me-1"></i>
+              Đăng Nhập
+            </NavigateButton>
+          )}
+        </div>
+      </div>
+
+      {/* Sidebar Navigation */}
+      <div className="position-fixed start-0 top-50 translate-middle-y d-flex flex-column gap-2 p-2" style={{ zIndex: 1000 }}>
         <NavigateButton
-          to="/login"
-          className="btn btn-sm btn-outline-black bg-white"
+          to="/nhap-du-lieu-tinh"
+          className="btn btn-light shadow-sm"
+          style={{ width: '150px', borderRadius: '10px' }}
         >
-          Đăng Nhập
+          <i className="fas fa-database me-2"></i>
+          Nhập dữ liệu
+        </NavigateButton>
+        <NavigateButton
+          to="/so-sanh-tinh-thanh"
+          className="btn btn-light shadow-sm"
+          style={{ width: '150px', borderRadius: '10px' }}
+        >
+          <i className="fas fa-chart-bar me-2"></i>
+          So sánh tỉnh thành
+        </NavigateButton>
+        <NavigateButton
+          to="/tin-tuc"
+          className="btn btn-light shadow-sm"
+          style={{ width: '150px', borderRadius: '10px' }}
+        >
+          <i className="fas fa-file-alt me-2"></i>
+          Tin Tức
+        </NavigateButton>
+        <NavigateButton
+          to="/tin-tuc"
+          className="btn btn-light shadow-sm"
+          style={{ width: '150px', borderRadius: '10px' }}
+        >
+          <i className="fas fa-chart-line me-2"></i>
+          Phân tích
+        </NavigateButton>
+        <NavigateButton
+          to="/cai-dat"
+          className="btn btn-light shadow-sm"
+          style={{ width: '150px', borderRadius: '10px' }}
+        >
+          <i className="fas fa-cog me-2"></i>
+          Cài đặt
         </NavigateButton>
       </div>
 
       {/* Thêm margin để tránh bị navbar che */}
-      <div className="container-fluid" style={{ marginTop: "70px" }}>
+      <div className="container-fluid">
         <div className="row">
           {/* Cột bản đồ - chiếm 8 cột */}
           <div className="col-lg-8">
@@ -262,7 +325,7 @@ const Dashboard = ({ title }) => {
                   projection="geoMercator"
                   projectionConfig={{
                     scale: 1500,
-                    center: [105, 15]
+                    center: [105, 17]
                   }}
                   style={{ width: "100%", height: "auto" }}
                 >
