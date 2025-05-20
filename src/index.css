@@ -1,13 +1,84 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+
+/* EmployeeList.css */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+li:nth-child(even) {
+  background-color: #f1f1f1;
+}
+
+li:hover {
+  background-color: #e2e2e2;
+}
+
+p {
+  text-align: center;
+  font-size: 16px;
+  color: #777;
+}
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 90px;
+  height: 14px;
+  box-shadow: 0 3px 0 #fff;
+  background: linear-gradient(#fff 0 0) 50%/2px 100% no-repeat;
+  display: grid;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  grid-area: 1/1;
+  background: radial-gradient(circle closest-side, var(--c, #fff) 92%, #0000) 0
+    0 / calc(100% / 4) 100%;
+  clip-path: inset(0 50% 0 0);
+  animation: l3 1s infinite linear;
+}
+.loader:after {
+  --c: red;
+  clip-path: inset(0 0 0 50%);
+}
+@keyframes l3 {
+  100% {
+    background-position: calc(100% / 3) 0;
+  }
 }
