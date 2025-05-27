@@ -7,6 +7,10 @@ import axios from "axios";
 import nv from '../../data/vietnam.json';
 import gadm36_XPI_0 from '../../data/gadm36_XPI_0.json';
 import gadm36_XSP_0 from '../../data/gadm36_XSP_0.json';
+import gadm36_VNM_0 from '../../data/gadm36_VNM_0.json';
+import gadm36_VNM_1 from '../../data/gadm36_VNM_1.json';
+import gadm36_VNM_2 from '../../data/gadm36_VNM_2.json';
+import gadm36_VNM_3 from '../../data/gadm36_VNM_3.json';
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Marker } from "react-simple-maps";
 import markerIcon from "../../assets/img/icons/marker.png";
 import { Line, Bar } from 'react-chartjs-2';
@@ -22,6 +26,7 @@ import {
   Legend
 } from 'chart.js';
 
+
 // Đăng ký các components của Chart.js
 ChartJS.register(
   CategoryScale,
@@ -34,7 +39,148 @@ ChartJS.register(
   Legend
 );
 
-const Dashboard = ({ title }) => {
+const GeoIDToAPI_ID = Object.freeze({
+  VNHN: "AA01",
+  VN03: "AA02",
+  VN04: "AA04",
+  VN07: "AA08",
+  VN02: "AA10",
+  VN71: "AA11",
+  VN01: "AA12",
+  VN05: "AA14",
+  VN06: "AA15",
+  VN14: "AA17",
+  VN69: "AA19",
+  VN09: "AA20",
+  VN13: "AA22",
+  VN54: "AA24",
+  VN68: "AA25",
+  VN70: "AA26",
+  VN56: "AA27",
+  VN61: "AA30",
+  VNHP: "AA31",
+  VN20: "AA34",
+  VN63: "AA35",
+  VN67: "AA36",
+  VN18: "AA37",
+  VN21: "AA38",
+  VN22: "AA40",
+  VN23: "AA42",
+  VN24: "AA44",
+  VN25: "AA45",
+  VNDN: "AA48",
+  VN27: "AA49",
+  VN29: "AA51",
+  VN31: "AA52",
+  VN32: "AA54",
+  VN34: "AA56",
+  VN36: "AA58",
+  VN40: "AA60",
+  VN28: "AA62",
+  VN30: "AA64",
+  VN33: "AA66",
+  VN72: "AA67",
+  VN35: "AA68",
+  VN58: "AA70",
+  VN37: "AA72",
+  VN57: "AA74",
+  VN41: "AA80",
+  VN46: "AA82",
+  VN50: "AA83",
+  VN51: "AA84",
+  VN49: "AA86",
+  VN44: "AA89",
+  VN47: "AA91",
+  VNCT: "AA92",
+  VN73: "AA93",
+  VN52: "AA94",
+  VN55: "AA95",
+  VN59: "AA96",
+  VNSG: "AA79",
+  VN43: "AA77",
+  VN26: "AA46",
+  VN45: "AA87",
+  VN53: "AA06",
+  VN66: "AA33",
+  VN39: "AA75",
+});
+
+const getYear = (item) => {
+  const year = Number(item.info_year);
+  return isNaN(year) ? 0 : year;
+};
+
+const convertData1 = (data = [], keyGetValueNumber, unitObject) => {
+  const obj = {};
+  data.forEach(item => {
+    if (!obj[item.province_code]) obj[item.province_code] = {};
+    obj[item.province_code][item.info_year] = {
+      id: item.id,
+      [keyGetValueNumber]: Number(item[keyGetValueNumber]),
+      unit_name: unitObject[item.unit_code],
+    };
+  });
+  return obj;
+}
+
+const convertData_popAge = (data = [], unitObject) => {
+  const obj = {};
+  data.forEach(item => {
+    if (!obj[item.province_code]) obj[item.province_code] = {};
+    if (!obj[item.province_code][item.info_year]) obj[item.province_code][item.info_year] = [];
+    obj[item.province_code][item.info_year].push({
+      id: item.id,
+      age_group: item.age_group,
+      unit_name_area_gr: unitObject[item.unit_code_area_gr],
+      population: item.population,
+      unit_name_pop: unitObject[item.unit_code_pop],
+    });
+  });
+  return obj;
+}
+
+const convertData_proInfo = (data = [], unitObject) => {
+  const obj = {};
+  data.forEach(item => {
+    obj[item.province_code] = {
+      id: item.id,
+      area: Number(item.area),
+      unit_name_area: unitObject[item.unit_code_area],
+      life_expectancy: Number(item.life_expectancy),
+      unit_name_life: unitObject[item.unit_code_life],
+    };
+  });
+  return obj;
+}
+
+const convertData_province = (data = []) => {
+  const obj = {};
+  data.forEach(item => {
+    obj[item.province_code] = {
+      code: item.province_code,
+      name: item.province_name,
+    };
+  });
+  return obj;
+}
+
+const getMaxYearFromObjectYear = (obj) => {
+  const years = Object.keys(obj).map(item => Number(item) || 0).filter(item => item);
+  return Math.max(...years);
+}
+
+const Dashboard = ({
+  title,
+  dataAgingIndex = [],
+  dataBirthRate = [],
+  dataDSTB = [],
+  dataGRDPS = [],
+  dataPopAge = [],
+  dataProInfo = [],
+  dataProvince = [],
+  dataTotalHouseholds = [],
+  unitObject = {},
+}) => {
   document.title = title;
   const navigate = useNavigate();
   const vietNam = [nv, gadm36_XPI_0, gadm36_XSP_0];
@@ -59,10 +205,102 @@ const Dashboard = ({ title }) => {
       }
     ]
   });
+  
+  // Data cho biểu đồ dân số
+  const [populationData, setPopulationData] = useState({
+    labels: ['2019', '2020', '2021', '2022', '2023'],
+    datasets: [
+      {
+        label: 'Dân số trung bình',
+        data: [1500000, 1520000, 1550000, 1530000, 1560000],
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    const customData = {};
+    const data = dataDSTB
+      .filter(item => item.province_code === "AA00")
+      .sort((a, b) => a.id - b.id);
+    customData.labels = data.map(item => `${item.info_year}`);
+    customData.datasets = [
+      {
+        label: 'Dân số trung bình',
+        data: data.map(item => Number(item.info_quantity)),
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1,
+      },
+    ]
+    setPopulationData({ ...customData });
+  }, [dataDSTB]);
+
+  // Data cho biểu đồ chỉ số già hóa
+  const [agingData, setAgingData] = useState({
+    labels: ['2019', '2020', '2021', '2022', '2023'],
+    datasets: [
+      {
+        label: 'Chỉ số già hóa (%)',
+        data: [24.1, 23.9, 26.5, 27.3, 28.6],
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      },
+    ],
+  });
+
+  useEffect(() => {
+    const data = dataAgingIndex
+      .filter(item => item.province_code === "AA00")
+      .sort((a, b) => a.id - b.id);
+    agingData.labels = data.map(item => `${item.info_year}`);
+    agingData.datasets = [
+      {
+        label: 'Chỉ số già hóa (%)',
+        data: data.map(item => Number(item.info_quantity)),
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      },
+    ];
+    setAgingData({ ...agingData });
+  }, [dataDSTB]);
+
+  // Common data
+  const [commonData, setCommonData] = useState({
+    dataAgingIndex: {},
+    dataBirthRate: {},
+    dataDSTB: {},
+    dataGRDPS: {},
+    dataPopAge: {},
+    dataProInfo: {},
+    dataProvince: {},
+    dataTotalHouseholds: {},
+  });
+  useEffect(() => {
+    commonData.dataAgingIndex = convertData1(dataAgingIndex, 'info_quantity', unitObject);
+    commonData.dataBirthRate = convertData1(dataBirthRate, 'info_quantity', unitObject);
+    commonData.dataDSTB = convertData1(dataDSTB, 'info_quantity', unitObject);
+    commonData.dataGRDPS = convertData1(dataGRDPS, 'growth_rate', unitObject);
+    commonData.dataPopAge = convertData_popAge(dataPopAge, unitObject);
+    commonData.dataProInfo = convertData_proInfo(dataProInfo, unitObject);
+    commonData.dataProvince = convertData_province(dataProvince);
+    commonData.dataTotalHouseholds = convertData1(dataTotalHouseholds, 'info_quantity', unitObject);
+    setCommonData({...commonData});
+  }, [
+    dataAgingIndex,
+    dataBirthRate,
+    dataDSTB,
+    dataGRDPS,
+    dataPopAge,
+    dataProInfo,
+    dataProvince,
+    dataTotalHouseholds,
+    unitObject
+  ]);
+  // Events
 
   const handleMouseEnter = (geo) => {
     setHoveredProvince(geo.properties);
-    console.log("Thông tin tỉnh:", geo);
   };
 
   const handleMouseLeave = () => {
@@ -84,7 +322,95 @@ const Dashboard = ({ title }) => {
       };
     }
     setPopupPosition(position);
-    setSelectedProvince(geo.properties);
+
+    const province_code = GeoIDToAPI_ID[geo.properties.id];
+
+    const texts = []; // textTitle, textValue, textUnit
+    let name = "";
+    let code = "";
+
+    const getTextV1 = (obj, textTitle, keyGetTextValue) => {
+      if (obj[province_code]) {
+        const year = getMaxYearFromObjectYear(obj[province_code]);
+        if (year) {
+          const item = obj[province_code][year];
+          texts.push({
+            textTitle,
+            textValue: item[keyGetTextValue],
+            textUnit: `${item.unit_name} (${year})`,
+          });
+        } else {
+          texts.push({
+            textTitle,
+            textValue: "Đang cập nhật ...",
+            textUnit: "",
+          });
+        }
+      }
+    }
+
+    const getText_popAge = () => {
+      if (commonData.dataPopAge[province_code]) {
+        const year = getMaxYearFromObjectYear(commonData.dataPopAge[province_code]);
+        if (year) {
+          const items = commonData.dataPopAge[province_code][year];
+          items.forEach(item => {
+            texts.push({
+              textTitle: "Dân số theo nhóm tuổi",
+              textValue: `${item.unit_name_area_gr} ${item.age_group}: ${item.population} ${item.unit_name_pop}`,
+              textUnit: `(${year})`,
+            });
+          });
+        } else {
+          texts.push({
+            textTitle: "Dân số theo nhóm tuổi",
+            textValue: "Đang cập nhật ...",
+            textUnit: "",
+          });
+        }
+      }
+    }
+
+    const getText_proInfo = () => {
+      const item = commonData.dataProInfo[province_code];
+      if (item) {
+        texts.push({
+          textTitle: "Tổng diện tích",
+          textValue: item.area,
+          textUnit: item.unit_name_area,
+        });
+        texts.push({
+          textTitle: "Tuổi thọ trung bình",
+          textValue: item.life_expectancy,
+          textUnit: `tuổi`,
+        });
+      }
+    }
+
+    const getText_dataProvince = () => {
+      const item = commonData.dataProvince[province_code];
+      if (item) {
+        name = item.name;
+        code = item.code;
+      }
+    }
+
+    getTextV1(commonData.dataAgingIndex, 'Chỉ số già hóa', 'info_quantity');
+    getTextV1(commonData.dataBirthRate, 'Tỉ lệ sinh', 'info_quantity');
+    getTextV1(commonData.dataDSTB, 'Biến động dân số', 'info_quantity');
+    getTextV1(commonData.dataGRDPS, 'GRDP', 'growth_rate');
+    getText_popAge();
+    getText_proInfo();
+    getText_dataProvince();
+    getTextV1(commonData.dataTotalHouseholds, 'Tổng số hộ dân cư', 'info_quantity');
+
+
+    const dataConvert = {
+      name,
+      code,
+      texts,
+    }
+    setSelectedProvince(dataConvert);
     setSelectedFromSearch(geo.properties.id);
     setShowPopup(true);
   };
@@ -131,32 +457,6 @@ const Dashboard = ({ title }) => {
       type: "island"
     }
   ];
-
-  // Data cho biểu đồ dân số
-  const populationData = {
-    labels: ['2019', '2020', '2021', '2022', '2023'],
-    datasets: [
-      {
-        label: 'Dân số trung bình',
-        data: [1500000, 1520000, 1550000, 1530000, 1560000],
-        fill: false,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
-      },
-    ],
-  };
-
-  // Data cho biểu đồ chỉ số già hóa
-  const agingData = {
-    labels: ['2019', '2020', '2021', '2022', '2023'],
-    datasets: [
-      {
-        label: 'Chỉ số già hóa (%)',
-        data: [24.1, 23.9, 26.5, 27.3, 28.6],
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      },
-    ],
-  };
 
   // Options cho biểu đồ
   const options = {
@@ -331,11 +631,11 @@ const Dashboard = ({ title }) => {
 
         {/* Nút đăng nhập/đăng xuất và tên người dùng */}
         <div className="d-flex align-items-center gap-2">
-          {localStorage.getItem("access_token") ? (
+          {localStorage.getItem("username") ? (
             <>
               <span className="text-white me-2">
                 <i className="fas fa-user-circle me-1"></i>
-                {localStorage.getItem("user_name") || "Người dùng"}
+                {localStorage.getItem("username") || "Người dùng"}
               </span>
               <NavigateButton
                 to="/logout"
@@ -544,13 +844,12 @@ const Dashboard = ({ title }) => {
                     </div>
                     <div className="card-body py-2">
                       <p className="mb-1"><strong>{selectedProvince.name}</strong></p>
-                      <p className="mb-1">Dân số trung bình <strong>3.409.812</strong> người</p>
-                      <p className="mb-1">Tổng diện tích <strong>1.648,6</strong> km2</p>
-                      <p className="mb-1">GRDP bình quân đầu người <strong>46</strong> triệu đồng</p>
-                      <p className="mb-1">Phụ nữ từ 15-49 tuổi <strong>793.286</strong> người</p>
-                      <p className="mb-1">Tuổi thọ trung bình <strong>73,1</strong> tuổi</p>
-                      <p className="mb-1 text-muted fst-italic">(Theo số liệu thống kê năm 2021)</p>
-                      <small className="text-muted">ID: {selectedProvince.id}</small>
+                      {
+                        selectedProvince.texts.map((item, index) => (
+                          <p className="mb-1" key={index}>{item.textTitle}: <strong>{item.textValue}</strong> {item.textUnit}</p>
+                        ))
+                      }
+                      <small className="text-muted">ID: {selectedProvince.code}</small>
                     </div>
                   </div>
                 )}

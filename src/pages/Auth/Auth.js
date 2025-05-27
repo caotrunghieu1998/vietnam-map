@@ -9,7 +9,7 @@ import "../../assets/vendor/css/theme-default.css";
 import "../../assets/css/demo.css";
 import "../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css";
 import "../../assets/vendor/css/pages/page-auth.css";
-import { USER_VERVICE } from "../../api/userService";
+import { USER_VERVICE } from "../../services/userService";
 
 const Login = ({ title }) => {
   const [userName, setUserName] = useState(""); // Input field cho email

@@ -1,13 +1,6 @@
-import { API_URL_INFO, MY_UUID } from "./URLS";
-import { CUSTOM_AXIOS } from "./customAxios";
-
-const sampleDataReturn = {
-    isSuccess: true,
-    data: null,
-    errorMessage: '',
-};
-
-const errorTextCommon = "Đã có lỗi xảy ra";
+import { API_URL_INFO, MY_UUID } from "../api/URLS";
+import { CUSTOM_AXIOS } from "../api/customAxios";
+import { errorTextCommon, sampleDataReturn } from "./common";
 
 export const DEPARTMENRS_VERVICE = {
     getAllData: async () => {

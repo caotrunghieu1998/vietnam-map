@@ -1,5 +1,5 @@
-import { API_URL_INFO, MY_UUID } from "./URLS";
-import { CUSTOM_AXIOS } from "./customAxios";
+import { API_URL_INFO, MY_UUID } from "../api/URLS";
+import { CUSTOM_AXIOS } from "../api/customAxios";
 
 const sampleDataReturn = {
     isSuccess: true,

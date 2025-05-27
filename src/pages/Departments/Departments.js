@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavigateButton from "../../components/Navigate";
-import { DEPARTMENRS_VERVICE } from "../../api/departments";
+import { DEPARTMENRS_VERVICE } from "../../services/departmentsService";
 import Loading from "../../utils/loading";
 
 const Department = ({ title, dataUser }) => {

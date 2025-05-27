@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { USER_VERVICE } from "../../api/userService";
+import { USER_VERVICE } from "../../services/userService";
 import { useEffect } from "react";
 
 const Logout = () => {
