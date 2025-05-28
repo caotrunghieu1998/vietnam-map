@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { Login, Forgot } from "../pages/Auth/Auth";
 // import { UserMe, GetAllUser } from "../pages/User/User";
-import Department from "../pages/Departments/Departments";
 import Introduce from "../pages/Introduce/Introduce";
 import CompareProvinces from "../pages/CompareProvinces/CompareProvinces";
 import News from "../pages/News/News";
@@ -24,6 +23,11 @@ import { TotalHouseholdsService } from "../services/TotalHouseholdsService";
 import { toast, ToastContainer } from "react-toastify";
 import { UnitService } from "../services/UnitService.js";
 import AgingIndexDepartment from "../pages/Departments/AgingIndexDepartment.js";
+import ChangePasswordDepartment from "../pages/Departments/ChangePasswordDepartment.js";
+import BirthRateDepartment from "../pages/Departments/BirthRateDepartment.js";
+import DSTBDepartment from "../pages/Departments/DSTBDepartment.js";
+import GRDPDepartment from "../pages/Departments/GRDPDepartment.js";
+import TotalHouseholdsDepartment from "../pages/Departments/TotalHouseholdsDepartment.js";
 
 // Helper to wrap protected routes
 const Protected = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
@@ -205,14 +209,86 @@ const AppRoutes = () => {
               }
             />
             <Route
-              path="/nhap-du-lieu-tinh"
+              path="/nhap-du-chi-so-gia-hoa"
               element={
                 <ProtectedLogin>
                   <AgingIndexDepartment 
-                    title="Nhập dữ liệu tỉnh" 
+                    title="Nhập dữ liệu chỉ số già hóa" 
                     dataAgingIndex={dataAgingIndex}
                     dataProvince={dataProvince}
                     unitObject={unitObject}
+                    setRefreshData={setRefreshData}
+                    setLoadding={setLoadding}
+                  />
+                </ProtectedLogin>
+              }
+            />
+            <Route
+              path="/ti-le-sinh"
+              element={
+                <ProtectedLogin>
+                  <BirthRateDepartment 
+                    title="Danh sách" 
+                    dataBirthRate={dataBirthRate}
+                    dataProvince={dataProvince}
+                    unitObject={unitObject}
+                    setRefreshData={setRefreshData}
+                    setLoadding={setLoadding}
+                  />
+                </ProtectedLogin>
+              }
+            />
+            <Route
+              path="/dstb"
+              element={
+                <ProtectedLogin>
+                  <DSTBDepartment 
+                    title="Nhập dữ liệu Dân số trung bình" 
+                    dataDSTB={dataDSTB}
+                    dataProvince={dataProvince}
+                    unitObject={unitObject}
+                    setRefreshData={setRefreshData}
+                    setLoadding={setLoadding}
+                  />
+                </ProtectedLogin>
+              }
+            />
+            <Route
+              path="/grdp"
+              element={
+                <ProtectedLogin>
+                  <GRDPDepartment
+                    title="Nhập dữ liệu GRDP" 
+                    dataGRDPS={dataGRDPS}
+                    dataProvince={dataProvince}
+                    unitObject={unitObject}
+                    setRefreshData={setRefreshData}
+                    setLoadding={setLoadding}
+                  />
+                </ProtectedLogin>
+              }
+            />
+            <Route
+              path="/total_households"
+              element={
+                <ProtectedLogin>
+                  <TotalHouseholdsDepartment
+                    title="Nhập dữ liệu Total House holds" 
+                    dataTotalHouseholds={dataTotalHouseholds}
+                    dataProvince={dataProvince}
+                    unitObject={unitObject}
+                    setRefreshData={setRefreshData}
+                    setLoadding={setLoadding}
+                  />
+                </ProtectedLogin>
+              }
+            />
+            <Route
+              path="/doi-mat-khau"
+              element={
+                <ProtectedLogin>
+                  <ChangePasswordDepartment 
+                    title="Đổi mật khẩu" 
                     setRefreshData={setRefreshData}
                     setLoadding={setLoadding}
                   />

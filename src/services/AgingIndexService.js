@@ -80,7 +80,7 @@ export const AgingIndexService = {
                 };
             }
         } catch (error) {
-            console.log("Error when AgingIndexService CREARE: ", error);
+            console.log("Error when AgingIndexService update: ", error);
             return {
                 success: false,
                 message: errorTextCommon,
@@ -112,7 +112,7 @@ export const AgingIndexService = {
                 };
             }
         } catch (error) {
-            console.log("Error when AgingIndexService CREARE: ", error);
+            console.log("Error when AgingIndexService delete: ", error);
             return {
                 success: false,
                 message: errorTextCommon,

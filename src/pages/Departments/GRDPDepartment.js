@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigateButton from "../../components/Navigate";
-import { AgingIndexService } from "../../services/AgingIndexService";
 import { toast } from "react-toastify";
 import NavigateMenu from "./NavigateMenu";
+import { GRDPService } from "../../services/GRDPService";
 
-const AgingIndexDepartment = ({ 
+const GRDPDepartment = ({ 
   title, 
   dataUser,
-  dataAgingIndex = [],
+  dataGRDPS = [],
   dataProvince = [],
   unitObject={},
   setRefreshData,
@@ -18,16 +18,17 @@ const AgingIndexDepartment = ({
   const [dataSelected, setDataSelected] = useState({
     "create_by": "",
     "update_by": "",
-    "info_quantity": "",
+    "id": "",
+    "growth_rate": "",
     "info_year": "",
     "province_code": ""
   });
 
-  const [dataAgingIndexConvert, setDataAgingIndexConvert] = useState({});
+  const [dataGRDPSConvert, setDataGRDPSConvert] = useState({});
 
   useEffect(() => {
     const data = {};
-    dataAgingIndex.forEach((item, index) => {
+    dataGRDPS.forEach((item, index) => {
       if (!data[item.info_year]) data[item.info_year] = [];
       data[item.info_year].push({
         ...item,
@@ -36,8 +37,8 @@ const AgingIndexDepartment = ({
         indexBase: index,
       });
     });
-    setDataAgingIndexConvert(data);
-  }, [dataAgingIndex]);
+    setDataGRDPSConvert(data);
+  }, [dataGRDPS]);
 
   const [currentTabYear, setCurrentTabYear] = useState(0);
 
@@ -57,13 +58,14 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.update(dataSelected);
+      } = await GRDPService.update(dataSelected);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
         dataSelected.create_by = "";
         dataSelected.update_by = "";
-        dataSelected.info_quantity = "";
+        dataSelected.id = "";
+        dataSelected.growth_rate = "";
         dataSelected.info_year = "";
         dataSelected.province_code = "";
         setDataSelected({...dataSelected});
@@ -75,13 +77,14 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.create(dataSelected);
+      } = await GRDPService.create(dataSelected);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
         dataSelected.create_by = "";
         dataSelected.update_by = "";
-        dataSelected.info_quantity = "";
+        dataSelected.id = "";
+        dataSelected.growth_rate = "";
         dataSelected.info_year = "";
         dataSelected.province_code = "";
         setDataSelected({...dataSelected});
@@ -93,9 +96,10 @@ const AgingIndexDepartment = ({
   };
 
   const handleEdit = (department) => {
-    dataSelected.info_quantity = department.info_quantity;
+    dataSelected.growth_rate = department.growth_rate;
     dataSelected.info_year = department.info_year;
     dataSelected.province_code = department.province_code;
+    dataSelected.id = department.id;
     setDataSelected({...dataSelected});
     setEditingId(department.id);
   };
@@ -106,7 +110,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.delete(data);
+      } = await GRDPService.delete(data);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -125,7 +129,7 @@ const AgingIndexDepartment = ({
           <div className="card mb-4">
             <NavigateMenu />
             <div className="card-header d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Nhập dữ liệu chỉ số già hóa</h5>
+              <h5 className="mb-0">Nhập liệu GRDP</h5>
               <NavigateButton to="/" className="btn btn-dark">
                 Trang Chủ
               </NavigateButton>
@@ -163,10 +167,10 @@ const AgingIndexDepartment = ({
                       type="number"
                       id="year"
                       className="form-control"
-                      value={dataSelected.info_quantity}
+                      value={dataSelected.growth_rate}
                       onChange={(e) => {
                         const newValue = e.target.value;
-                        dataSelected.info_quantity = newValue;
+                        dataSelected.growth_rate = newValue;
                         setDataSelected({...dataSelected});
                       }}
                       placeholder="Nhập thông số"
@@ -205,9 +209,10 @@ const AgingIndexDepartment = ({
                         // setYear("");
                         dataSelected.create_by = "";
                         dataSelected.update_by = "";
-                        dataSelected.info_quantity = "";
+                        dataSelected.growth_rate = "";
                         dataSelected.province_code = "";
                         dataSelected.info_year = "";
+                        dataSelected.id = "";
                         setDataSelected({...dataSelected});
                       }}
                     >
@@ -227,7 +232,7 @@ const AgingIndexDepartment = ({
             <div className="card-body">
               <div className="year-option">
                 {
-                  Object.keys(dataAgingIndexConvert).map((key, index) => 
+                  Object.keys(dataGRDPSConvert).map((key, index) => 
                     <div 
                       key={index} 
                       className={`year-item ${currentTabYear === index ? 'active' : ''}`}
@@ -249,12 +254,12 @@ const AgingIndexDepartment = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {(dataAgingIndexConvert[Object.keys(dataAgingIndexConvert)[currentTabYear]] || []).map((data, index) => (
+                    {(dataGRDPSConvert[Object.keys(dataGRDPSConvert)[currentTabYear]] || []).map((data, index) => (
                       <tr key={data.id}>
                         <td>{index + 1}</td>
                         <td>{data.province_name || ''}</td>
                         <td>{data.info_year}</td>
-                        <td>{data.info_quantity}</td>
+                        <td>{data.growth_rate}</td>
                         <td>{data.unit_name}</td>
                         <td>
                           <button
@@ -285,4 +290,4 @@ const AgingIndexDepartment = ({
   );
 };
 
-export default AgingIndexDepartment;
+export default GRDPDepartment;

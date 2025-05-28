@@ -76,5 +76,40 @@ export const USER_VERVICE = {
         } finally {
             localStorage.removeItem('username');
         }
-    }
+    },
+    userChangePassword: async ({
+        password_old,
+        password_new,
+        re_password_new,
+        username,
+    }) => {
+        try {
+            const data = await CUSTOM_AXIOS.POST({
+                url: API_URL_INFO.USER_CHANGE_PASSWORD,
+                body: {
+                    password_old,
+                    password_new,
+                    re_password_new,
+                    username,
+                }
+            });
+            if (data?.status === 200 && data?.data) {
+                return {
+                    success: true,
+                    message: data?.message || "",
+                }
+            }
+            return {
+                success: false,
+                message: data?.message || errorTextCommon,
+            }
+
+        } catch (error) {
+            console.error("Error when userChangePassword: ", error);
+            return {
+                success: false,
+                message: errorTextCommon,
+            }
+        }
+    },
 };

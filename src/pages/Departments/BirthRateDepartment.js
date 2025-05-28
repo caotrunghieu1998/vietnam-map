@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigateButton from "../../components/Navigate";
-import { AgingIndexService } from "../../services/AgingIndexService";
+import { BirthRateService } from "../../services/BirthRateService";
 import { toast } from "react-toastify";
 import NavigateMenu from "./NavigateMenu";
 
-const AgingIndexDepartment = ({ 
+const BirthRateDepartment = ({ 
   title, 
   dataUser,
-  dataAgingIndex = [],
+  dataBirthRate = [],
   dataProvince = [],
   unitObject={},
   setRefreshData,
@@ -23,11 +23,11 @@ const AgingIndexDepartment = ({
     "province_code": ""
   });
 
-  const [dataAgingIndexConvert, setDataAgingIndexConvert] = useState({});
+  const [dataBirthRateConvert, setDataBirthRateConvert] = useState({});
 
   useEffect(() => {
     const data = {};
-    dataAgingIndex.forEach((item, index) => {
+    dataBirthRate.forEach((item, index) => {
       if (!data[item.info_year]) data[item.info_year] = [];
       data[item.info_year].push({
         ...item,
@@ -36,8 +36,8 @@ const AgingIndexDepartment = ({
         indexBase: index,
       });
     });
-    setDataAgingIndexConvert(data);
-  }, [dataAgingIndex]);
+    setDataBirthRateConvert(data);
+  }, [dataBirthRate]);
 
   const [currentTabYear, setCurrentTabYear] = useState(0);
 
@@ -57,7 +57,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.update(dataSelected);
+      } = await BirthRateService.update(dataSelected);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -75,7 +75,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.create(dataSelected);
+      } = await BirthRateService.create(dataSelected);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -106,7 +106,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.delete(data);
+      } = await BirthRateService.delete(data);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -125,7 +125,7 @@ const AgingIndexDepartment = ({
           <div className="card mb-4">
             <NavigateMenu />
             <div className="card-header d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Nhập dữ liệu chỉ số già hóa</h5>
+              <h5 className="mb-0">Nhập liệu tỉ lệ sinh</h5>
               <NavigateButton to="/" className="btn btn-dark">
                 Trang Chủ
               </NavigateButton>
@@ -227,7 +227,7 @@ const AgingIndexDepartment = ({
             <div className="card-body">
               <div className="year-option">
                 {
-                  Object.keys(dataAgingIndexConvert).map((key, index) => 
+                  Object.keys(dataBirthRateConvert).map((key, index) => 
                     <div 
                       key={index} 
                       className={`year-item ${currentTabYear === index ? 'active' : ''}`}
@@ -249,7 +249,7 @@ const AgingIndexDepartment = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {(dataAgingIndexConvert[Object.keys(dataAgingIndexConvert)[currentTabYear]] || []).map((data, index) => (
+                    {(dataBirthRateConvert[Object.keys(dataBirthRateConvert)[currentTabYear]] || []).map((data, index) => (
                       <tr key={data.id}>
                         <td>{index + 1}</td>
                         <td>{data.province_name || ''}</td>
@@ -285,4 +285,4 @@ const AgingIndexDepartment = ({
   );
 };
 
-export default AgingIndexDepartment;
+export default BirthRateDepartment;

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigateButton from "../../components/Navigate";
-import { AgingIndexService } from "../../services/AgingIndexService";
 import { toast } from "react-toastify";
 import NavigateMenu from "./NavigateMenu";
+import { DSTBService } from "../../services/DSTBService";
 
-const AgingIndexDepartment = ({ 
+const DSTBDepartment = ({ 
   title, 
   dataUser,
-  dataAgingIndex = [],
+  dataDSTB = [],
   dataProvince = [],
   unitObject={},
   setRefreshData,
@@ -23,11 +23,11 @@ const AgingIndexDepartment = ({
     "province_code": ""
   });
 
-  const [dataAgingIndexConvert, setDataAgingIndexConvert] = useState({});
+  const [dataDSTBConvert, setDataDSTBConvert] = useState({});
 
   useEffect(() => {
     const data = {};
-    dataAgingIndex.forEach((item, index) => {
+    dataDSTB.forEach((item, index) => {
       if (!data[item.info_year]) data[item.info_year] = [];
       data[item.info_year].push({
         ...item,
@@ -36,8 +36,8 @@ const AgingIndexDepartment = ({
         indexBase: index,
       });
     });
-    setDataAgingIndexConvert(data);
-  }, [dataAgingIndex]);
+    setDataDSTBConvert(data);
+  }, [dataDSTB]);
 
   const [currentTabYear, setCurrentTabYear] = useState(0);
 
@@ -57,7 +57,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.update(dataSelected);
+      } = await DSTBService.update(dataSelected);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -75,7 +75,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.create(dataSelected);
+      } = await DSTBService.create(dataSelected);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -106,7 +106,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.delete(data);
+      } = await DSTBService.delete(data);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -125,7 +125,7 @@ const AgingIndexDepartment = ({
           <div className="card mb-4">
             <NavigateMenu />
             <div className="card-header d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Nhập dữ liệu chỉ số già hóa</h5>
+              <h5 className="mb-0">Nhập dữ liệu dân số trung bình</h5>
               <NavigateButton to="/" className="btn btn-dark">
                 Trang Chủ
               </NavigateButton>
@@ -227,7 +227,7 @@ const AgingIndexDepartment = ({
             <div className="card-body">
               <div className="year-option">
                 {
-                  Object.keys(dataAgingIndexConvert).map((key, index) => 
+                  Object.keys(dataDSTBConvert).map((key, index) => 
                     <div 
                       key={index} 
                       className={`year-item ${currentTabYear === index ? 'active' : ''}`}
@@ -249,7 +249,7 @@ const AgingIndexDepartment = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {(dataAgingIndexConvert[Object.keys(dataAgingIndexConvert)[currentTabYear]] || []).map((data, index) => (
+                    {(dataDSTBConvert[Object.keys(dataDSTBConvert)[currentTabYear]] || []).map((data, index) => (
                       <tr key={data.id}>
                         <td>{index + 1}</td>
                         <td>{data.province_name || ''}</td>
@@ -285,4 +285,4 @@ const AgingIndexDepartment = ({
   );
 };
 
-export default AgingIndexDepartment;
+export default DSTBDepartment;

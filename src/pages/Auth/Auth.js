@@ -32,7 +32,7 @@ const Login = ({ title }) => {
     if (dataLogin.isSuccess && dataLogin.data) {
       alert(`Xin chào "${dataLogin.data.USERNAME}"`);
       localStorage.setItem("username", dataLogin.data.USERNAME);
-      navigate("/nhap-du-lieu-tinh");
+      navigate("/nhap-du-chi-so-gia-hoa");
     } else {
       setValidationError(dataLogin.errorMessage);
     }
@@ -122,12 +122,12 @@ const Login = ({ title }) => {
                   <p style={{ color: "red" }}>{validationError}</p>
                 )}
 
-                <NavigateButton
+                {/* <NavigateButton
                   to="/forgot-password"
                   className="btn btn-sm btn-outline-primary"
                 >
                   Quên mật khẩu?
-                </NavigateButton>
+                </NavigateButton> */}
               </div>
             </div>
           </div>

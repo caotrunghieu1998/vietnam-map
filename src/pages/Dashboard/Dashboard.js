@@ -790,7 +790,7 @@ const Dashboard = ({
       {/* Sidebar Navigation */}
       <div className="position-fixed start-0 top-50 translate-middle-y d-flex flex-column gap-2 p-2" style={{ zIndex: 1000 }}>
         <NavigateButton
-          to="/nhap-du-lieu-tinh"
+          to="/nhap-du-chi-so-gia-hoa"
           className="btn btn-light shadow-sm"
           style={{ width: '150px', borderRadius: '10px' }}
         >

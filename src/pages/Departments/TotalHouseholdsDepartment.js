@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigateButton from "../../components/Navigate";
-import { AgingIndexService } from "../../services/AgingIndexService";
 import { toast } from "react-toastify";
 import NavigateMenu from "./NavigateMenu";
+import { TotalHouseholdsService } from "../../services/TotalHouseholdsService";
 
-const AgingIndexDepartment = ({ 
+const TotalHouseholdsDepartment = ({ 
   title, 
   dataUser,
-  dataAgingIndex = [],
+  dataTotalHouseholds = [],
   dataProvince = [],
   unitObject={},
   setRefreshData,
@@ -23,11 +23,11 @@ const AgingIndexDepartment = ({
     "province_code": ""
   });
 
-  const [dataAgingIndexConvert, setDataAgingIndexConvert] = useState({});
+  const [dataTotalHouseholdsConvert, setDataTotalHouseholdsConvert] = useState({});
 
   useEffect(() => {
     const data = {};
-    dataAgingIndex.forEach((item, index) => {
+    dataTotalHouseholds.forEach((item, index) => {
       if (!data[item.info_year]) data[item.info_year] = [];
       data[item.info_year].push({
         ...item,
@@ -36,8 +36,8 @@ const AgingIndexDepartment = ({
         indexBase: index,
       });
     });
-    setDataAgingIndexConvert(data);
-  }, [dataAgingIndex]);
+    setDataTotalHouseholdsConvert(data);
+  }, [dataTotalHouseholds]);
 
   const [currentTabYear, setCurrentTabYear] = useState(0);
 
@@ -57,7 +57,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.update(dataSelected);
+      } = await TotalHouseholdsService.update(dataSelected);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -75,7 +75,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.create(dataSelected);
+      } = await TotalHouseholdsService.create(dataSelected);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -106,7 +106,7 @@ const AgingIndexDepartment = ({
       const {
         success,
         message,
-      } = await AgingIndexService.delete(data);
+      } = await TotalHouseholdsService.delete(data);
       if (success) {
         toast.success(message);
         setRefreshData(Date.now());
@@ -125,7 +125,7 @@ const AgingIndexDepartment = ({
           <div className="card mb-4">
             <NavigateMenu />
             <div className="card-header d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Nhập dữ liệu chỉ số già hóa</h5>
+              <h5 className="mb-0">{title}</h5>
               <NavigateButton to="/" className="btn btn-dark">
                 Trang Chủ
               </NavigateButton>
@@ -222,12 +222,12 @@ const AgingIndexDepartment = ({
           {/* Table to display departments */}
           <div className="card">
             <div className="card-header">
-              <h5 className="mb-0">Danh sách</h5>
+              <h5 className="mb-0">Danh sách tỉ lệ sinh</h5>
             </div>
             <div className="card-body">
               <div className="year-option">
                 {
-                  Object.keys(dataAgingIndexConvert).map((key, index) => 
+                  Object.keys(dataTotalHouseholdsConvert).map((key, index) => 
                     <div 
                       key={index} 
                       className={`year-item ${currentTabYear === index ? 'active' : ''}`}
@@ -249,7 +249,7 @@ const AgingIndexDepartment = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {(dataAgingIndexConvert[Object.keys(dataAgingIndexConvert)[currentTabYear]] || []).map((data, index) => (
+                    {(dataTotalHouseholdsConvert[Object.keys(dataTotalHouseholdsConvert)[currentTabYear]] || []).map((data, index) => (
                       <tr key={data.id}>
                         <td>{index + 1}</td>
                         <td>{data.province_name || ''}</td>
@@ -285,4 +285,4 @@ const AgingIndexDepartment = ({
   );
 };
 
-export default AgingIndexDepartment;
+export default TotalHouseholdsDepartment;

@@ -56,6 +56,7 @@ p {
   font-size: 16px;
   color: #777;
 }
+
 /* HTML: <div class="loader"></div> */
 .loader {
   width: 90px;
@@ -64,19 +65,21 @@ p {
   background: linear-gradient(#fff 0 0) 50%/2px 100% no-repeat;
   display: grid;
 }
+
 .loader:before,
 .loader:after {
   content: "";
   grid-area: 1/1;
-  background: radial-gradient(circle closest-side, var(--c, #fff) 92%, #0000) 0
-    0 / calc(100% / 4) 100%;
+  background: radial-gradient(circle closest-side, var(--c, #fff) 92%, #0000) 0 0 / calc(100% / 4) 100%;
   clip-path: inset(0 50% 0 0);
   animation: l3 1s infinite linear;
 }
+
 .loader:after {
   --c: red;
   clip-path: inset(0 0 0 50%);
 }
+
 @keyframes l3 {
   100% {
     background-position: calc(100% / 3) 0;
@@ -107,8 +110,10 @@ p {
 }
 
 #loader {
-  border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid #3498db; /* Blue */
+  border: 16px solid #f3f3f3;
+  /* Light grey */
+  border-top: 16px solid #3498db;
+  /* Blue */
   border-radius: 50%;
   width: 120px;
   height: 120px;
@@ -116,8 +121,13 @@ p {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .year-option {
@@ -134,8 +144,17 @@ p {
   cursor: pointer;
 }
 
-.year-option .year-item.active{
-    background: black;
-    color: white;
-    font-weight: bold;
+.year-option .year-item.active {
+  background: black;
+  color: white;
+  font-weight: bold;
+}
+
+.navigate-menu {
+  padding: 20px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
 }
