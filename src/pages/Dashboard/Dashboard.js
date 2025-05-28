@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { fetchData } from "../../components/fetchData";
 import manWithLaptop from "../../assets/img/illustrations/man-with-laptop.png";
 import NavigateButton from "../../components/Navigate";
 import { replace, useNavigate } from "react-router-dom";
-import axios from "axios";
 import nv from '../../data/vietnam.json';
 import gadm36_XPI_0 from '../../data/gadm36_XPI_0.json';
 import gadm36_XSP_0 from '../../data/gadm36_XSP_0.json';
@@ -25,6 +23,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import { ProvinceService } from "../../services/ProvinceService";
 
 
 // Đăng ký các components của Chart.js
@@ -105,11 +104,6 @@ const GeoIDToAPI_ID = Object.freeze({
   VN39: "AA75",
 });
 
-const getYear = (item) => {
-  const year = Number(item.info_year);
-  return isNaN(year) ? 0 : year;
-};
-
 const convertData1 = (data = [], keyGetValueNumber, unitObject) => {
   const obj = {};
   data.forEach(item => {
@@ -169,6 +163,8 @@ const getMaxYearFromObjectYear = (obj) => {
   return Math.max(...years);
 }
 
+const ID_TOAN_QUOC = "AA00";
+
 const Dashboard = ({
   title,
   dataAgingIndex = [],
@@ -180,6 +176,8 @@ const Dashboard = ({
   dataProvince = [],
   dataTotalHouseholds = [],
   unitObject = {},
+  dataObjectDudoandanso = {},
+  setDataObjectDudoandanso,
 }) => {
   document.title = title;
   const navigate = useNavigate();
@@ -193,77 +191,9 @@ const Dashboard = ({
   const [searchResults, setSearchResults] = useState([]);
   const [selectedFromSearch, setSelectedFromSearch] = useState(null);
   const [viewMode, setViewMode] = useState('statistics'); // 'statistics' or 'prediction'
-  const [predictionData, setPredictionData] = useState({
-    labels: ['2024', '2025', '2026', '2027', '2028'],
-    datasets: [
-      {
-        label: 'Dự đoán dân số',
-        data: [98000000, 98500000, 99000000, 99500000, 100000000],
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        fill: true,
-      }
-    ]
-  });
-  
-  // Data cho biểu đồ dân số
-  const [populationData, setPopulationData] = useState({
-    labels: ['2019', '2020', '2021', '2022', '2023'],
-    datasets: [
-      {
-        label: 'Dân số trung bình',
-        data: [1500000, 1520000, 1550000, 1530000, 1560000],
-        fill: false,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
-      },
-    ],
-  });
-
-  useEffect(() => {
-    const customData = {};
-    const data = dataDSTB
-      .filter(item => item.province_code === "AA00")
-      .sort((a, b) => a.id - b.id);
-    customData.labels = data.map(item => `${item.info_year}`);
-    customData.datasets = [
-      {
-        label: 'Dân số trung bình',
-        data: data.map(item => Number(item.info_quantity)),
-        fill: false,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
-      },
-    ]
-    setPopulationData({ ...customData });
-  }, [dataDSTB]);
-
-  // Data cho biểu đồ chỉ số già hóa
-  const [agingData, setAgingData] = useState({
-    labels: ['2019', '2020', '2021', '2022', '2023'],
-    datasets: [
-      {
-        label: 'Chỉ số già hóa (%)',
-        data: [24.1, 23.9, 26.5, 27.3, 28.6],
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      },
-    ],
-  });
-
-  useEffect(() => {
-    const data = dataAgingIndex
-      .filter(item => item.province_code === "AA00")
-      .sort((a, b) => a.id - b.id);
-    agingData.labels = data.map(item => `${item.info_year}`);
-    agingData.datasets = [
-      {
-        label: 'Chỉ số già hóa (%)',
-        data: data.map(item => Number(item.info_quantity)),
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      },
-    ];
-    setAgingData({ ...agingData });
-  }, [dataDSTB]);
+  const [predictionDataLoadding, setPredictionDataLoadding] = useState(false);
+  const [province_code_selected, set_province_code_selected] = useState(ID_TOAN_QUOC);
+  const [year_selected, set_year_selected] = useState('');
 
   // Common data
   const [commonData, setCommonData] = useState({
@@ -285,7 +215,9 @@ const Dashboard = ({
     commonData.dataProInfo = convertData_proInfo(dataProInfo, unitObject);
     commonData.dataProvince = convertData_province(dataProvince);
     commonData.dataTotalHouseholds = convertData1(dataTotalHouseholds, 'info_quantity', unitObject);
-    setCommonData({...commonData});
+    setCommonData({
+      ...commonData
+    });
   }, [
     dataAgingIndex,
     dataBirthRate,
@@ -297,6 +229,176 @@ const Dashboard = ({
     dataTotalHouseholds,
     unitObject
   ]);
+
+  const dataYear = () => {
+    const currentYear = (new Date()).getFullYear();
+    const result = [];
+    for (let i = -10; i <= 0; i++) {
+      result.push(currentYear + i);
+    }
+    return result;
+  }
+
+
+  const [predictionData, setPredictionData] = useState({
+    labels: ['2024', '2025', '2026', '2027', '2028'],
+    datasets: [
+      {
+        label: 'Dự đoán dân số',
+        data: [98000000, 98500000, 99000000, 99500000, 100000000],
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        fill: true,
+      }
+    ]
+  });
+  const [titlePredictionData, setTitlePredictionData] = useState("");
+  const [textInfosPredictionData, setTextInfosPredictionData] = useState([]);
+  
+  // Data cho biểu đồ dân số
+  const [populationData, setPopulationData] = useState({
+    labels: ['2019', '2020', '2021', '2022', '2023'],
+    datasets: [
+      {
+        label: 'Dân số trung bình',
+        data: [1500000, 1520000, 1550000, 1530000, 1560000],
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1,
+      },
+    ],
+  });
+
+  // Data cho biểu đồ chỉ số già hóa
+  const [agingData, setAgingData] = useState({
+    labels: ['2019', '2020', '2021', '2022', '2023'],
+    datasets: [
+      {
+        label: 'Chỉ số già hóa (%)',
+        data: [24.1, 23.9, 26.5, 27.3, 28.6],
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      },
+    ],
+  });
+
+  useEffect(() => {
+    const province_code = province_code_selected || ID_TOAN_QUOC;
+    const dataProvinceInfo = dataProvince.find(item => item.province_code === province_code);
+    const _year_selected = Number(year_selected) || 0;
+
+    const processPopulationData = () => {
+      const dataProvinceFromCommon = commonData.dataDSTB[province_code];
+      if (!dataProvinceInfo || !dataProvinceFromCommon) return;
+
+      let data = dataProvinceFromCommon;
+      if (_year_selected) {
+        data = {
+          [_year_selected]: dataProvinceFromCommon[_year_selected]
+        }
+      }
+
+      const customData = {};
+      customData.labels = Object.keys(data);
+      customData.datasets = [{
+        label: `${dataProvinceInfo?.province_name || ''} (Đơn vị: ${data[Object.keys(data)[0]]?.unit_name || 'Chưa xác định'})`,
+        data: Object.keys(data).map(key => data[key]?.info_quantity || 0),
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1,
+      }, ]
+      setPopulationData({
+        ...customData
+      });
+    };
+    const processDataAgingIndex = () => {
+      const dataAgingIndexCommon = commonData.dataAgingIndex[province_code];
+      if (!dataProvinceInfo || !dataAgingIndexCommon) return;
+
+      let data = dataAgingIndexCommon;
+      if (_year_selected) {
+        data = {
+          [_year_selected]: dataAgingIndexCommon[_year_selected]
+        }
+      }
+
+      const customData = {};
+      customData.labels = Object.keys(data);
+      customData.datasets = [{
+        label: `${dataProvinceInfo?.province_name || ''} (Đơn vị: ${data[Object.keys(data)[0]]?.unit_name || 'Chưa xác định'})`,
+        data: Object.keys(data).map(key => data[key]?.info_quantity || 0),
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      }, ]
+      setAgingData({
+        ...customData
+      });
+    }
+    const processPredictionData = async () => {
+      setPredictionDataLoadding(true);
+      const _textInfosPredictionData = [];
+
+      setTitlePredictionData(dataProvinceInfo?.province_name || '');
+
+      // Dự đoán dân số của tỉnh
+      const currentYear = (new Date()).getFullYear();
+      let data = [];
+      if (dataObjectDudoandanso[province_code]) {
+        data = dataObjectDudoandanso[province_code];
+      } else {
+        data = await Promise.all(Array.from({
+          length: 11
+        }, (_, i) => i).map(async index => {
+          const year = currentYear + index;
+          const data = await ProvinceService.dudoandanso(province_code, year);
+          return data;
+        }));
+        if (data.length) {
+          dataObjectDudoandanso[province_code] = data;
+          setDataObjectDudoandanso({
+            ...dataObjectDudoandanso
+          });
+        }
+      }
+      const dataFilter = data.filter(item => item);
+      predictionData.labels = dataFilter.map(item => item.year);
+      predictionData.datasets = [{
+          label: 'Holt winters prediction',
+          data: dataFilter.map(item => item.holt_winters_prediction),
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.5)',
+          fill: true,
+        },
+        {
+          label: 'Linear regression prediction',
+          data: dataFilter.map(item => item.linear_regression_prediction),
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          fill: true,
+        }
+      ];
+      setPredictionData({
+        ...predictionData
+      });
+
+      const lastItem = dataFilter[dataFilter.length - 1];
+      if (lastItem) {
+        _textInfosPredictionData.push(...[
+          `Dựa trên xu hướng tăng trưởng dân số hiện tại, dân số '${dataProvinceInfo?.province_name || ''}' được dự đoán sẽ:`,
+          `Đạt ${lastItem.holt_winters_prediction} ${lastItem.unit_name} vào năm ${lastItem.year} (Theo Holt winters prediction).`,
+          `Đạt ${lastItem.linear_regression_prediction} ${lastItem.unit_name} vào năm ${lastItem.year} (Theo Linear regression prediction).`,
+        ]);
+      }
+
+      setTextInfosPredictionData(_textInfosPredictionData);
+
+      setPredictionDataLoadding(false);
+    }
+
+    // Call data
+    processPopulationData();
+    processDataAgingIndex();
+    processPredictionData();
+  }, [commonData, province_code_selected, year_selected]);
+
   // Events
 
   const handleMouseEnter = (geo) => {
@@ -307,7 +409,7 @@ const Dashboard = ({
     setHoveredProvince(null);
   };
 
-  const handleProvinceClick = (geo, event) => {
+  const handleProvinceClick = async (geo, event) => {
     let position;
     if (event) {
       const rect = event.target.getBoundingClientRect();
@@ -324,25 +426,41 @@ const Dashboard = ({
     setPopupPosition(position);
 
     const province_code = GeoIDToAPI_ID[geo.properties.id];
+    set_province_code_selected(province_code);
 
     const texts = []; // textTitle, textValue, textUnit
     let name = "";
     let code = "";
 
+    ProvinceService.getProvinceCode(province_code);
+
     const getTextV1 = (obj, textTitle, keyGetTextValue) => {
       if (obj[province_code]) {
-        const year = getMaxYearFromObjectYear(obj[province_code]);
+        let year = 0;
+        if (year_selected) year = Number(year_selected);
+        else year = getMaxYearFromObjectYear(obj[province_code]);
+
+        let notFound = false;
+
         if (year) {
           const item = obj[province_code][year];
-          texts.push({
-            textTitle,
-            textValue: item[keyGetTextValue],
-            textUnit: `${item.unit_name} (${year})`,
-          });
+          if (item) {
+            texts.push({
+              textTitle,
+              textValue: item[keyGetTextValue],
+              textUnit: `${item.unit_name} (${year})`,
+            });
+          } else {
+              notFound = true;
+          }
         } else {
+          notFound = true;
+        }
+
+        if (notFound) {
           texts.push({
             textTitle,
-            textValue: "Đang cập nhật ...",
+            textValue: `Đang cập nhật ... (${year})`,
             textUnit: "",
           });
         }
@@ -351,20 +469,30 @@ const Dashboard = ({
 
     const getText_popAge = () => {
       if (commonData.dataPopAge[province_code]) {
-        const year = getMaxYearFromObjectYear(commonData.dataPopAge[province_code]);
+        let year = 0;
+        let notFound = false;
+        if (year_selected) year = Number(year_selected);
+        else year = getMaxYearFromObjectYear(commonData.dataPopAge[province_code]);
         if (year) {
           const items = commonData.dataPopAge[province_code][year];
-          items.forEach(item => {
-            texts.push({
-              textTitle: "Dân số theo nhóm tuổi",
-              textValue: `${item.unit_name_area_gr} ${item.age_group}: ${item.population} ${item.unit_name_pop}`,
-              textUnit: `(${year})`,
+          if (items) {
+            items.forEach(item => {
+              texts.push({
+                textTitle: "Dân số theo nhóm tuổi",
+                textValue: `${item.unit_name_area_gr} ${item.age_group}: ${item.population} ${item.unit_name_pop}`,
+                textUnit: `(${year})`,
+              });
             });
-          });
+          } else {
+            notFound = true
+          }
         } else {
+          notFound = true;
+        }
+        if (notFound) {
           texts.push({
             textTitle: "Dân số theo nhóm tuổi",
-            textValue: "Đang cập nhật ...",
+            textValue: `Đang cập nhật ... (${year})`,
             textUnit: "",
           });
         }
@@ -395,6 +523,7 @@ const Dashboard = ({
       }
     }
 
+    // Add text to popup
     getTextV1(commonData.dataAgingIndex, 'Chỉ số già hóa', 'info_quantity');
     getTextV1(commonData.dataBirthRate, 'Tỉ lệ sinh', 'info_quantity');
     getTextV1(commonData.dataDSTB, 'Biến động dân số', 'info_quantity');
@@ -403,7 +532,6 @@ const Dashboard = ({
     getText_proInfo();
     getText_dataProvince();
     getTextV1(commonData.dataTotalHouseholds, 'Tổng số hộ dân cư', 'info_quantity');
-
 
     const dataConvert = {
       name,
@@ -436,12 +564,12 @@ const Dashboard = ({
   };
 
   const highlightedRegions = [
-    { id: "VNHN", icon: markerIcon, x: -8, y: -18 },
-    { id: "VNSG", icon: markerIcon, x: -1, y: -8 },
-    { id: "VN33", icon: markerIcon, x: -9, y: -25 },
-    { id: "VN26", icon: markerIcon, x: 1, y: -11 },
-    { id: "VN23", icon: markerIcon, x: 1, y: -5 },
-    { id: "VN59", icon: markerIcon, x: -2, y: -5 }
+    // { id: "VNHN", icon: markerIcon, x: -8, y: -18 },
+    // { id: "VNSG", icon: markerIcon, x: -1, y: -8 },
+    // { id: "VN33", icon: markerIcon, x: -9, y: -25 },
+    // { id: "VN26", icon: markerIcon, x: 1, y: -11 },
+    // { id: "VN23", icon: markerIcon, x: 1, y: -5 },
+    // { id: "VN59", icon: markerIcon, x: -2, y: -5 }
   ];
 
   // Thêm tọa độ cho Hoàng Sa và Trường Sa
@@ -609,13 +737,15 @@ const Dashboard = ({
                 e.target.style.border = '1px solid #e0e0e0';
                 e.target.style.background = 'rgba(255, 255, 255, 0.9)';
               }}
+              onChange={(e) => {
+                set_year_selected(e.target.value);
+                setShowPopup(false);
+              }}
             >
               <option value="">Chọn năm</option>
-              <option value="2023">2023</option>
-              <option value="2022">2022</option>
-              <option value="2021">2021</option>
-              <option value="2020">2020</option>
-              <option value="2019">2019</option>
+              {
+                dataYear().map(year => <option key={year} value={year}>{year}</option>)
+              }
             </select>
             <i className="fas fa-chevron-down position-absolute" 
                style={{ 
@@ -843,13 +973,19 @@ const Dashboard = ({
                       ></button>
                     </div>
                     <div className="card-body py-2">
-                      <p className="mb-1"><strong>{selectedProvince.name}</strong></p>
                       {
-                        selectedProvince.texts.map((item, index) => (
-                          <p className="mb-1" key={index}>{item.textTitle}: <strong>{item.textValue}</strong> {item.textUnit}</p>
-                        ))
+                        predictionDataLoadding ?   
+                          <p className="mb-1"><strong>Đang cập nhật data</strong></p> : 
+                          <>
+                          <p className="mb-1"><strong>{selectedProvince.name}</strong></p>
+                          {
+                            selectedProvince.texts.map((item, index) => (
+                              <p className="mb-1" key={index}>{item.textTitle}: <strong>{item.textValue}</strong> {item.textUnit}</p>
+                            ))
+                          }
+                          <small className="text-muted">ID: {selectedProvince.code}</small>
+                          </>
                       }
-                      <small className="text-muted">ID: {selectedProvince.code}</small>
                     </div>
                   </div>
                 )}
@@ -1005,11 +1141,14 @@ const Dashboard = ({
             ) : (
               <div className="card" style={{ backgroundColor: 'white', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
                 <div className="card-header" style={{ backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
-                  <h5 className="card-title mb-0">Dự đoán dân số Việt Nam</h5>
+                  <h5 className="card-title mb-0">Dự đoán dân số Việt Nam trong 10 năm tiếp theo</h5>
                 </div>
                 <div className="card-body">
                   <div style={{ height: '250px' }}>
-                    <Line 
+                    {
+                      predictionDataLoadding ? 
+                        <p>Đang cập nhật data ....</p> : 
+                        <Line 
                       data={predictionData} 
                       options={{
                         ...options,
@@ -1018,7 +1157,7 @@ const Dashboard = ({
                           ...options.plugins,
                           title: {
                             ...options.plugins.title,
-                            text: 'Dự đoán dân số đến năm 2028',
+                            text: titlePredictionData,
                             font: {
                               size: 12
                             }
@@ -1063,12 +1202,19 @@ const Dashboard = ({
                         }
                       }} 
                     />
+                    }
                   </div>
                   <div className="alert alert-info mt-2 mb-0">
                     <h6 className="alert-heading mb-1">Thông tin dự đoán:</h6>
-                    <p className="mb-0 small">
-                      Dựa trên xu hướng tăng trưởng dân số hiện tại, dân số Việt Nam được dự đoán sẽ đạt 100 triệu người vào năm 2028.
-                    </p>
+                    {
+                      predictionDataLoadding ? <p className="small">Đang cập nhật ...</p> : <>
+                        {
+                          textInfosPredictionData.map((text, index) => (
+                            <p className="small" key={index}>{text}</p>
+                          ))
+                        }
+                      </>
+                    }
                   </div>
                 </div>
               </div>

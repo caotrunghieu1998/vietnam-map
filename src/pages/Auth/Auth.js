@@ -29,31 +29,13 @@ const Login = ({ title }) => {
 
     const dataLogin = await USER_VERVICE.userLogin({ username: userName, password: password });
 
-    if (dataLogin.isSuccess) {
+    if (dataLogin.isSuccess && dataLogin.data) {
       alert(`Xin chào "${dataLogin.data.USERNAME}"`);
       localStorage.setItem("username", dataLogin.data.USERNAME);
       navigate("/nhap-du-lieu-tinh");
     } else {
       setValidationError(dataLogin.errorMessage);
     }
-    // try {
-    //   const response = await axios.post(
-    //     `${process.env.REACT_APP_API_URL}/auth/login`,
-    //     {
-    //       userName, // Gửi userName dưới dạng username
-    //       password,
-    //     }
-    //   );
-
-    //   // Lưu access token vào localStorage
-    //   localStorage.setItem("access_token", response.data.access_token);
-    //   localStorage.setItem("refresh_token", response.data.refresh_token);
-    //   localStorage.setItem("token_type", response.data.token_type);
-    //   setValidationError(""); // Xóa lỗi validate
-    //   navigate("/"); // Điều hướng tới trang dashboard sau khi đăng nhập thành công
-    // } catch (error) {
-    //   setValidationError("Đã có lỗi xảy ra");
-    // }
   };
 
   useEffect(() => { 
@@ -196,10 +178,9 @@ const Forgot = ({ title }) => {
             {/* Forgot Password */}
             <div className="card px-sm-6 px-0">
               <div className="card-body">
-                <h4 className="mb-1">Quên mật khẩu chứ gì? 🔒</h4>
+                <h4 className="mb-1">Quên mật khẩu? 🔒</h4>
                 <p className="mb-6">
-                  Có cái mật khẩu củng không giữ được thì làm sao giữ được người
-                  yêu lêu lêu
+                  Nhập thông tin để tiến thành lấy lại mật khẩu
                 </p>
                 <form
                   onSubmit={handleForgot}

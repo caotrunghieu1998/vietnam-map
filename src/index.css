@@ -119,3 +119,23 @@ p {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.year-option {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 20px;
+}
+
+.year-option .year-item {
+  border: 1px solid black;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+.year-option .year-item.active{
+    background: black;
+    color: white;
+    font-weight: bold;
+}

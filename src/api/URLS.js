@@ -10,6 +10,9 @@ export const API_URL_INFO = {
     DEPARTMENTS_ALL: '/api/province/all',
     // API chỉ số già hoá
     AGING_INDEX_ALL: '/api/aging_index/all',
+    AGING_INDEX_CREATE: '/api/aging_index/create',
+    AGING_INDEX_UPDATE: '/api/aging_index/update',
+    AGING_INDEX_DELETE: '/api/aging_index/delete',
     // API Tỉ lệ sinh
     BIRTH_RATE_ALL: '/api/birth_rate/all',
     // API Dân số trung bình
@@ -23,6 +26,8 @@ export const API_URL_INFO = {
     // Quản lý API Tỉnh
     PROVINCE_ALL: '/api/province/all',
     PROVINCE_SO_SANH: '/api/province/sosanh_tinh',
+    PROVINCE_GET_PROVINCE_CODE: '/api/province/get_province_code',
+    PROVINCE_dudoandanso: '/api/province/dudoandanso',
     // Tổng số hộ dân cư
     TOTAL_HOUSEHOLDS_ALL: '/api/total_households/all',
     // Unit

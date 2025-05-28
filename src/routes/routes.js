@@ -23,12 +23,13 @@ import { ProvinceService } from "../services/ProvinceService";
 import { TotalHouseholdsService } from "../services/TotalHouseholdsService";
 import { toast, ToastContainer } from "react-toastify";
 import { UnitService } from "../services/UnitService.js";
+import AgingIndexDepartment from "../pages/Departments/AgingIndexDepartment.js";
 
 // Helper to wrap protected routes
 const Protected = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
 
-const ProtectedLogin = ({ children, loadding, setLoadding }) => {
-  // const [isLoading, setIsLoading] = useState(true);
+const ProtectedLogin = ({ children }) => {
+  const [loadding, setLoadding] = useState(true);
   const [dataUser, setDataUser] = useState(null);
   const navigate = useNavigate();
 
@@ -39,7 +40,7 @@ const ProtectedLogin = ({ children, loadding, setLoadding }) => {
         setDataUser(data.data);
         setLoadding(false);
       } else {
-        alert(data.errorMessage);
+        toast("Vui lòng đăng nhập để tiếp tục!");
         navigate("/login");
       }
     }
@@ -68,6 +69,9 @@ const AppRoutes = () => {
   const [dataProvince, setDataProvince] = useState([]);
   const [dataTotalHouseholds, setDataTotalHouseholds] = useState([]);
   const [unitObject, setDataUnitObject] = useState([]);
+  const [dataObjectDudoandanso, setDataObjectDudoandanso] = useState({});
+
+  const [refreshData, setRefreshData] = useState(0);
 
   useEffect(() => {
     const getALLData = async () => {
@@ -125,7 +129,7 @@ const AppRoutes = () => {
       setLoaddingBaseData(false);
     };
     getALLData();
-  }, []);
+  }, [refreshData]);
 
 
 
@@ -149,6 +153,8 @@ const AppRoutes = () => {
               dataProvince={dataProvince}
               dataTotalHouseholds={dataTotalHouseholds}
               unitObject={unitObject}
+              dataObjectDudoandanso={dataObjectDudoandanso}
+              setDataObjectDudoandanso={setDataObjectDudoandanso}
             />} />
             <Route
               path="/forgot-password"
@@ -201,8 +207,15 @@ const AppRoutes = () => {
             <Route
               path="/nhap-du-lieu-tinh"
               element={
-                <ProtectedLogin loadding={loadding} setLoadding={setLoadding}>
-                  <Department title="Nhập dữ liệu tỉnh" />
+                <ProtectedLogin>
+                  <AgingIndexDepartment 
+                    title="Nhập dữ liệu tỉnh" 
+                    dataAgingIndex={dataAgingIndex}
+                    dataProvince={dataProvince}
+                    unitObject={unitObject}
+                    setRefreshData={setRefreshData}
+                    setLoadding={setLoadding}
+                  />
                 </ProtectedLogin>
               }
             />
